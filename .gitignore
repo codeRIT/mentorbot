@@ -39,3 +39,8 @@ gradle-app.setting
 
 # Cache of project
 .gradletasknamecache
+
+
+
+## INTELLIJ - custom
+/.idea/
