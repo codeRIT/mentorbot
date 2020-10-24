@@ -37,6 +37,23 @@ public class Topic {
     }
 
     /**
+     * Check if a Member is inside the queue.
+     * @param member The Member to check
+     * @return True if the member is in the queue, false otherwise
+     */
+    public boolean isInQueue(Member member) {
+        return queue.contains(member);
+    }
+
+    /**
+     * Returns an array of all Members in the queue.
+     * @return The Members in this queue
+     */
+    public Member[] getMembersInQueue() {
+        return queue.toArray(new Member[0]);
+    }
+
+    /**
      * Remove and return the next Member in the queue.
      * @return The Member at the front of the queue
      */

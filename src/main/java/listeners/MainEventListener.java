@@ -32,7 +32,7 @@ public class MainEventListener extends ListenerAdapter {
     private final HashMap<String, Server> servers = new HashMap<>();
 
     /**
-     * Check if the given Member has administrator permissions.
+     * Check if the given Member has administrator permissions. Notifies the user if they do not have permission.
      * @param member The Member to check
      * @return True if the Member has admin, false otherwise
      */
@@ -42,6 +42,27 @@ public class MainEventListener extends ListenerAdapter {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Check if the given Topic exists in the Server. Notifies the user if the topic does not exist.
+     * @param member The Member to reply to
+     * @param channel The Channel to reply within
+     * @param server The Server to check in
+     * @param topic The Topic to check for
+     * @return Contains the Topic, if it exists
+     */
+    private static Optional<Topic> checkTopicExists(Member member, TextChannel channel, Server server, String topic) {
+        Optional<Topic> topicOptional = Arrays.stream(server.getTopics())
+                .filter(t -> t.getName().equalsIgnoreCase(topic))
+                .findFirst();
+        if (topicOptional.isEmpty()) {
+            channel.sendMessage(String.format(
+                    "%s Topic \"%s\" does not exist.",
+                    member.getAsMention(),
+                    topic)).complete();
+        }
+        return topicOptional;
     }
 
     @Override
@@ -65,6 +86,9 @@ public class MainEventListener extends ListenerAdapter {
             case "maketopic" -> commandHandler = this::maketopic;
             case "deletetopic" -> commandHandler = this::deletetopic;
             case "showtopics" -> commandHandler = this::showtopics;
+            case "queue" -> commandHandler = this::queue;
+            case "ready" -> commandHandler = this::ready;
+            case "showqueue" -> commandHandler = this::showqueue;
             default -> commandHandler = this::unknownCommand;
         }
         commandHandler.handle(
@@ -113,6 +137,63 @@ public class MainEventListener extends ListenerAdapter {
                 "%s List of topics:\n%s",
                 member.getAsMention(),
                 topicList)).complete();
+    }
+
+    private void queue(Member member, TextChannel channel, Server server, String[] args) {
+        Optional<Topic> topicOptional = checkTopicExists(member, channel, server, args[0]);
+        if (topicOptional.isEmpty()) return;
+
+        Topic topic = topicOptional.get();
+        if (topic.isInQueue(member)) {
+            topic.removeFromQueue(member);
+            channel.sendMessage(String.format(
+                    "%s has left the \"%s\" queue.",
+                    member.getAsMention(),
+                    args[0])).complete();
+        } else {
+            topic.addToQueue(member);
+            channel.sendMessage(String.format(
+                    "%s has joined the \"%s\" queue.",
+                    member.getAsMention(),
+                    args[0])).complete();
+        }
+    }
+
+    private void ready(Member member, TextChannel channel, Server server, String[] args) {
+        if (!checkAdmin(member, channel)) return;
+
+        Optional<Topic> topicOptional = checkTopicExists(member, channel, server, args[0]);
+        if (topicOptional.isEmpty()) return;
+
+        Topic topic = topicOptional.get();
+        Member mentee = topic.getNextFromQueue();
+        channel.sendMessage(String.format(
+                "%s is ready for %s.",
+                member.getAsMention(),
+                mentee.getAsMention())).complete();
+    }
+
+    private void showqueue(Member member, TextChannel channel, Server server, String[] args) {
+        Optional<Topic> topicOptional = checkTopicExists(member, channel, server, args[0]);
+        if (topicOptional.isEmpty()) return;
+
+        Topic topic = topicOptional.get();
+        if (topic.getMembersInQueue().length == 0) {
+            channel.sendMessage(String.format(
+                    "%s Queue \"%s\" is empty.",
+                    member.getAsMention(),
+                    topic.getName())).complete();
+        } else {
+            String menteeList = Arrays.stream(topic.getMembersInQueue())
+                    .map(Member::getEffectiveName)
+                    .collect(Collectors.joining("\n"));
+
+            channel.sendMessage(String.format(
+                    "%s Members in \"%s\" queue:\n%s",
+                    member.getAsMention(),
+                    topic.getName(),
+                    menteeList)).complete();
+        }
     }
 
     private void unknownCommand(Member member, TextChannel channel, Server server, String[] args) {
