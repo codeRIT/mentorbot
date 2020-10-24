@@ -5,7 +5,6 @@ import net.dv8tion.jda.api.entities.Role;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * An object that provides Topic CRUD methods for a Guild.
