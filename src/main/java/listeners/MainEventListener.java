@@ -2,6 +2,7 @@ package listeners;
 
 import entities.Server;
 import entities.Topic;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Member;
@@ -99,7 +100,19 @@ public class MainEventListener extends ListenerAdapter {
     }
 
     private void help(Member member, TextChannel channel, Server server, String[] args) {
-        channel.sendMessage(member.getAsMention() + " No commands implemented yet!").complete();
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setTitle("Help!");
+        embedBuilder.setDescription("Possible commands:");
+        embedBuilder.setColor(0xE57D25);
+
+        embedBuilder.addField("$queue <topic>", "Add yourself to a queue.", false);
+        embedBuilder.addField("$showqueue <topic>", "Show the people currently in queue.", false);
+        embedBuilder.addField("$showtopics", "List all topics.", false);
+        embedBuilder.addField("$ready <topic> (admin only)", "Retrieve the next person from the queue.", false);
+        embedBuilder.addField("$maketopic <name> (admin only)", "Create a new topic.", false);
+        embedBuilder.addField("$deletetopic <name> (admin only)", "Delete a topic.", false);
+
+        channel.sendMessage(embedBuilder.build()).complete();
     }
 
     private void maketopic(Member member, TextChannel channel, Server server, String[] args) {
