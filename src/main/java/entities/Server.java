@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.entities.Role;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * An object that provides Topic CRUD methods for a Guild.
@@ -66,6 +67,6 @@ public class Server {
      * @return An array of Topics
      */
     public Topic[] getTopics() {
-        return (Topic[]) topics.toArray();
+        return topics.toArray(new Topic[0]);
     }
 }
