@@ -90,6 +90,7 @@ public class MainEventListener extends ListenerAdapter {
             case "queue" -> commandHandler = this::queue;
             case "ready" -> commandHandler = this::ready;
             case "showqueue" -> commandHandler = this::showqueue;
+            case "clear" -> commandHandler = this::clear;
             default -> commandHandler = this::unknownCommand;
         }
         commandHandler.handle(
@@ -109,6 +110,7 @@ public class MainEventListener extends ListenerAdapter {
         embedBuilder.addField("$showqueue <topic>", "Show the people currently in queue.", false);
         embedBuilder.addField("$showtopics", "List all topics.", false);
         embedBuilder.addField("$ready <topic> (admin only)", "Retrieve the next person from the queue.", false);
+        embedBuilder.addField("$clear <topic> (admin only)", "Clear the specified queue.", false);
         embedBuilder.addField("$maketopic <name> (admin only)", "Create a new topic.", false);
         embedBuilder.addField("$deletetopic <name> (admin only)", "Delete a topic.", false);
 
@@ -207,6 +209,21 @@ public class MainEventListener extends ListenerAdapter {
                     topic.getName(),
                     menteeList)).complete();
         }
+    }
+
+    private void clear(Member member, TextChannel channel, Server server, String[] args) {
+        if (!checkAdmin(member, channel)) return;
+
+        Optional<Topic> topicOptional = checkTopicExists(member, channel, server, args[0]);
+        if (topicOptional.isEmpty()) return;
+
+        Topic topic = topicOptional.get();
+        Arrays.stream(topic.getMembersInQueue()).forEach(topic::removeFromQueue);
+
+        channel.sendMessage(String.format(
+                "%s has cleared the \"%s\" queue.",
+                member.getAsMention(),
+                topic.getName())).complete();
     }
 
     private void unknownCommand(Member member, TextChannel channel, Server server, String[] args) {
