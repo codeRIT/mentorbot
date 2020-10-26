@@ -7,7 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * An object that provides Topic CRUD methods for a Guild.
+ * An object that provides methods to store Topic information into
+ * a Guild's role list.
  */
 public class Server {
     private final Guild guild;
