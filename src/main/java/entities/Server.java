@@ -47,7 +47,7 @@ public class Server {
         guild.createRole()
                 .setName("Topic | " + topic.getName())
                 .setMentionable(true)
-                .complete();
+                .queue();
         topics.add(topic);
     }
 
@@ -57,7 +57,7 @@ public class Server {
      */
     public void deleteTopic(Topic topic) {
         guild.getRolesByName("Topic | " + topic.getName(), true)
-                .forEach((role -> role.delete().complete()));
+                .forEach((role -> role.delete().queue()));
         topics.remove(topic);
     }
 

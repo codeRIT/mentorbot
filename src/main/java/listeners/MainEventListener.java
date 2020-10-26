@@ -39,7 +39,7 @@ public class MainEventListener extends ListenerAdapter {
      */
     private static boolean checkAdmin(Member member, TextChannel channel) {
         if (!member.hasPermission(Permission.ADMINISTRATOR)) {
-            channel.sendMessage(member.getAsMention() + " You must have administrator permission to run this command.").complete();
+            channel.sendMessage(member.getAsMention() + " You must have administrator permission to run this command.").queue();
             return false;
         }
         return true;
@@ -61,7 +61,7 @@ public class MainEventListener extends ListenerAdapter {
             channel.sendMessage(String.format(
                     "%s Topic \"%s\" does not exist.",
                     member.getAsMention(),
-                    topic)).complete();
+                    topic)).queue();
         }
         return topicOptional;
     }
@@ -114,7 +114,7 @@ public class MainEventListener extends ListenerAdapter {
         embedBuilder.addField("$maketopic <name> (admin only)", "Create a new topic.", false);
         embedBuilder.addField("$deletetopic <name> (admin only)", "Delete a topic.", false);
 
-        channel.sendMessage(embedBuilder.build()).complete();
+        channel.sendMessage(embedBuilder.build()).queue();
     }
 
     private void maketopic(Member member, TextChannel channel, Server server, String[] args) {
@@ -126,7 +126,7 @@ public class MainEventListener extends ListenerAdapter {
         channel.sendMessage(String.format(
                 "%s Topic role \"%s\" has been created.",
                 member.getAsMention(),
-                args[0])).complete();
+                args[0])).queue();
     }
 
     private void deletetopic(Member member, TextChannel channel, Server server, String[] args) {
@@ -140,7 +140,7 @@ public class MainEventListener extends ListenerAdapter {
         channel.sendMessage(String.format(
                 "%s Topic role \"%s\" has been deleted.",
                 member.getAsMention(),
-                args[0])).complete();
+                args[0])).queue();
     }
 
     private void showtopics(Member member, TextChannel channel, Server server, String[] args) {
@@ -151,7 +151,7 @@ public class MainEventListener extends ListenerAdapter {
         channel.sendMessage(String.format(
                 "%s List of topics:\n%s",
                 member.getAsMention(),
-                topicList)).complete();
+                topicList)).queue();
     }
 
     private void queue(Member member, TextChannel channel, Server server, String[] args) {
@@ -164,13 +164,13 @@ public class MainEventListener extends ListenerAdapter {
             channel.sendMessage(String.format(
                     "%s has left the \"%s\" queue.",
                     member.getAsMention(),
-                    args[0])).complete();
+                    args[0])).queue();
         } else {
             topic.addToQueue(member);
             channel.sendMessage(String.format(
                     "%s has joined the \"%s\" queue.",
                     member.getAsMention(),
-                    args[0])).complete();
+                    args[0])).queue();
         }
     }
 
@@ -185,7 +185,7 @@ public class MainEventListener extends ListenerAdapter {
         channel.sendMessage(String.format(
                 "%s is ready for %s.",
                 member.getAsMention(),
-                mentee.getAsMention())).complete();
+                mentee.getAsMention())).queue();
     }
 
     private void showqueue(Member member, TextChannel channel, Server server, String[] args) {
@@ -197,7 +197,7 @@ public class MainEventListener extends ListenerAdapter {
             channel.sendMessage(String.format(
                     "%s Queue \"%s\" is empty.",
                     member.getAsMention(),
-                    topic.getName())).complete();
+                    topic.getName())).queue();
         } else {
             String menteeList = Arrays.stream(topic.getMembersInQueue())
                     .map(Member::getEffectiveName)
@@ -207,7 +207,7 @@ public class MainEventListener extends ListenerAdapter {
                     "%s Members in \"%s\" queue:\n%s",
                     member.getAsMention(),
                     topic.getName(),
-                    menteeList)).complete();
+                    menteeList)).queue();
         }
     }
 
@@ -223,10 +223,10 @@ public class MainEventListener extends ListenerAdapter {
         channel.sendMessage(String.format(
                 "%s has cleared the \"%s\" queue.",
                 member.getAsMention(),
-                topic.getName())).complete();
+                topic.getName())).queue();
     }
 
     private void unknownCommand(Member member, TextChannel channel, Server server, String[] args) {
-        channel.sendMessage(member.getAsMention() + " Command does not exist! Try $help for a list of valid commands.").complete();
+        channel.sendMessage(member.getAsMention() + " Command does not exist! Try $help for a list of valid commands.").queue();
     }
 }
