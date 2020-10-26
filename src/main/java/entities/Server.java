@@ -23,23 +23,6 @@ public class Server {
     }
 
     /**
-     * Constructs a Server object from a Guild's role list.
-     * @param guild The guild to build from
-     * @return A Server with all topics added
-     */
-    public static Server load(Guild guild) {
-        Server server = new Server(guild);
-        List<Role> roles = guild.getRoles();
-        for (Role role : roles) {
-            String name = role.getName();
-            if (name.startsWith("Topic | ")) {
-                server.topics.add(new Topic(name.substring(8)));
-            }
-        }
-        return server;
-    }
-
-    /**
      * Creates a new Topic role in this server.
      * @param topic The Topic to add
      */
@@ -67,5 +50,22 @@ public class Server {
      */
     public Topic[] getTopics() {
         return topics.toArray(new Topic[0]);
+    }
+
+    /**
+     * Constructs a Server object from a Guild's role list.
+     * @param guild The guild to build from
+     * @return A Server with all topics added
+     */
+    public static Server load(Guild guild) {
+        Server server = new Server(guild);
+        List<Role> roles = guild.getRoles();
+        for (Role role : roles) {
+            String name = role.getName();
+            if (name.startsWith("Topic | ")) {
+                server.topics.add(new Topic(name.substring(8)));
+            }
+        }
+        return server;
     }
 }
