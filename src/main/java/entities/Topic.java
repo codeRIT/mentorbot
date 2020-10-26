@@ -2,14 +2,14 @@ package entities;
 
 import net.dv8tion.jda.api.entities.Member;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  * A topic for a server. Internally contains a queue of Members.
  */
 public class Topic {
     private final String name;
-    private final ArrayList<Member> queue = new ArrayList<>();
+    private final LinkedList<Member> queue = new LinkedList<>();
 
     /**
      * Constructs a new Topic object. This does not automatically create
@@ -58,7 +58,7 @@ public class Topic {
      * @return The Member at the front of the queue
      */
     public Member getNextFromQueue() {
-        return queue.remove(0);
+        return queue.remove();
     }
 
     /**
