@@ -84,12 +84,12 @@ public class MainEventListener extends ListenerAdapter {
         CommandHandler commandHandler;
         switch (tokens[0].substring(1)) {
             case "help" -> commandHandler = this::help;
-            case "maketopic" -> commandHandler = this::maketopic;
-            case "deletetopic" -> commandHandler = this::deletetopic;
-            case "showtopics" -> commandHandler = this::showtopics;
+            case "maketopic" -> commandHandler = this::makeTopic;
+            case "deletetopic" -> commandHandler = this::deleteTopic;
+            case "showtopics" -> commandHandler = this::showTopics;
             case "queue" -> commandHandler = this::queue;
             case "ready" -> commandHandler = this::ready;
-            case "showqueue" -> commandHandler = this::showqueue;
+            case "showqueue" -> commandHandler = this::showQueue;
             case "clear" -> commandHandler = this::clear;
             default -> commandHandler = this::unknownCommand;
         }
@@ -117,7 +117,7 @@ public class MainEventListener extends ListenerAdapter {
         channel.sendMessage(embedBuilder.build()).queue();
     }
 
-    private void maketopic(Member member, TextChannel channel, Server server, String[] args) {
+    private void makeTopic(Member member, TextChannel channel, Server server, String[] args) {
         if (!checkAdmin(member, channel)) return;
 
         Topic topic = new Topic(args[0]);
@@ -129,7 +129,7 @@ public class MainEventListener extends ListenerAdapter {
                 args[0])).queue();
     }
 
-    private void deletetopic(Member member, TextChannel channel, Server server, String[] args) {
+    private void deleteTopic(Member member, TextChannel channel, Server server, String[] args) {
         if (!checkAdmin(member, channel)) return;
 
         Arrays.stream(server.getTopics())                   // loop over all topics...
@@ -143,7 +143,7 @@ public class MainEventListener extends ListenerAdapter {
                 args[0])).queue();
     }
 
-    private void showtopics(Member member, TextChannel channel, Server server, String[] args) {
+    private void showTopics(Member member, TextChannel channel, Server server, String[] args) {
         String topicList = Arrays.stream(server.getTopics())
                 .map(Topic::getName)
                 .collect(Collectors.joining("\n"));
@@ -188,7 +188,7 @@ public class MainEventListener extends ListenerAdapter {
                 mentee.getAsMention())).queue();
     }
 
-    private void showqueue(Member member, TextChannel channel, Server server, String[] args) {
+    private void showQueue(Member member, TextChannel channel, Server server, String[] args) {
         Optional<Topic> topicOptional = checkTopicExists(member, channel, server, args[0]);
         if (topicOptional.isEmpty()) return;
 
