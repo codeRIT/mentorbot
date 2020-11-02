@@ -5,6 +5,7 @@ import entities.Topic;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.ReadyEvent;
@@ -76,6 +77,10 @@ public class MainEventListener extends ListenerAdapter {
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
         String[] tokens = event.getMessage().getContentDisplay().split(" ");
         if (!tokens[0].startsWith("$")) return;
+        String[] args = Arrays.copyOfRange(tokens, 1, tokens.length);
+
+        Member member = Objects.requireNonNull(event.getMember());
+        TextChannel channel = event.getChannel();
 
         String guildID = event.getGuild().getId();
         Server server = servers.computeIfAbsent(guildID, k -> Server.load(event.getGuild()));
@@ -93,11 +98,7 @@ public class MainEventListener extends ListenerAdapter {
             case "clear" -> commandHandler = this::clear;
             default -> commandHandler = this::unknownCommand;
         }
-        commandHandler.handle(
-                Objects.requireNonNull(event.getMember()),
-                event.getChannel(),
-                server,
-                Arrays.copyOfRange(tokens, 1, tokens.length));
+        commandHandler.handle(member, channel, server, args);
     }
 
     private void help(Member member, TextChannel channel, Server server, String[] args) {
