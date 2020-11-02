@@ -61,6 +61,10 @@ public class Server {
      * @return An array of Topics
      */
     public Topic[] getTopics() {
+        /*
+         The Java runtime will automatically expand the passed-in array to fit the
+         contents of `topics` in a performant, thread-safe manner.
+         */
         return topics.toArray(new Topic[0]);
     }
 }
