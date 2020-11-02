@@ -88,15 +88,15 @@ public class MainEventListener extends ListenerAdapter {
         // pick the correct method to call
         CommandHandler commandHandler;
         switch (tokens[0].substring(1)) {
-            case "help" -> commandHandler = this::help;
-            case "maketopic" -> commandHandler = this::makeTopic;
+            case "help"        -> commandHandler = this::help;
+            case "maketopic"   -> commandHandler = this::makeTopic;
             case "deletetopic" -> commandHandler = this::deleteTopic;
-            case "showtopics" -> commandHandler = this::showTopics;
-            case "queue" -> commandHandler = this::queue;
-            case "ready" -> commandHandler = this::ready;
-            case "showqueue" -> commandHandler = this::showQueue;
-            case "clear" -> commandHandler = this::clear;
-            default -> commandHandler = this::unknownCommand;
+            case "showtopics"  -> commandHandler = this::showTopics;
+            case "queue"       -> commandHandler = this::queue;
+            case "ready"       -> commandHandler = this::ready;
+            case "showqueue"   -> commandHandler = this::showQueue;
+            case "clear"       -> commandHandler = this::clear;
+            default            -> commandHandler = this::unknownCommand;
         }
         commandHandler.handle(member, channel, server, args);
     }
