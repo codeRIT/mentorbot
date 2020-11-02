@@ -5,7 +5,6 @@ import entities.Topic;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.ReadyEvent;
@@ -55,16 +54,16 @@ public class MainEventListener extends ListenerAdapter {
      * @return Contains the Topic, if it exists
      */
     private static Optional<Topic> checkTopicExists(Member member, TextChannel channel, Server server, String topic) {
-        Optional<Topic> topicOptional = Arrays.stream(server.getTopics())
+        Optional<Topic> optionalTopic = Arrays.stream(server.getTopics())
                 .filter(t -> t.getName().equalsIgnoreCase(topic))
                 .findFirst();
-        if (topicOptional.isEmpty()) {
+        if (optionalTopic.isEmpty()) {
             channel.sendMessage(String.format(
                     "%s Topic \"%s\" does not exist.",
                     member.getAsMention(),
                     topic)).queue();
         }
-        return topicOptional;
+        return optionalTopic;
     }
 
     @Override
@@ -156,10 +155,10 @@ public class MainEventListener extends ListenerAdapter {
     }
 
     private void queue(Member member, TextChannel channel, Server server, String[] args) {
-        Optional<Topic> topicOptional = checkTopicExists(member, channel, server, args[0]);
-        if (topicOptional.isEmpty()) return;
+        Optional<Topic> optionalTopic = checkTopicExists(member, channel, server, args[0]);
+        if (optionalTopic.isEmpty()) return;
 
-        Topic topic = topicOptional.get();
+        Topic topic = optionalTopic.get();
         if (topic.isInQueue(member)) {
             topic.removeFromQueue(member);
             channel.sendMessage(String.format(
@@ -178,10 +177,10 @@ public class MainEventListener extends ListenerAdapter {
     private void ready(Member member, TextChannel channel, Server server, String[] args) {
         if (!checkAdmin(member, channel)) return;
 
-        Optional<Topic> topicOptional = checkTopicExists(member, channel, server, args[0]);
-        if (topicOptional.isEmpty()) return;
+        Optional<Topic> optionalTopic = checkTopicExists(member, channel, server, args[0]);
+        if (optionalTopic.isEmpty()) return;
 
-        Topic topic = topicOptional.get();
+        Topic topic = optionalTopic.get();
         Member mentee = topic.getNextFromQueue();
         channel.sendMessage(String.format(
                 "%s is ready for %s.",
@@ -190,10 +189,10 @@ public class MainEventListener extends ListenerAdapter {
     }
 
     private void showQueue(Member member, TextChannel channel, Server server, String[] args) {
-        Optional<Topic> topicOptional = checkTopicExists(member, channel, server, args[0]);
-        if (topicOptional.isEmpty()) return;
+        Optional<Topic> optionalTopic = checkTopicExists(member, channel, server, args[0]);
+        if (optionalTopic.isEmpty()) return;
 
-        Topic topic = topicOptional.get();
+        Topic topic = optionalTopic.get();
         if (topic.getMembersInQueue().length == 0) {
             channel.sendMessage(String.format(
                     "%s Queue \"%s\" is empty.",
@@ -215,10 +214,10 @@ public class MainEventListener extends ListenerAdapter {
     private void clear(Member member, TextChannel channel, Server server, String[] args) {
         if (!checkAdmin(member, channel)) return;
 
-        Optional<Topic> topicOptional = checkTopicExists(member, channel, server, args[0]);
-        if (topicOptional.isEmpty()) return;
+        Optional<Topic> optionalTopic = checkTopicExists(member, channel, server, args[0]);
+        if (optionalTopic.isEmpty()) return;
 
-        Topic topic = topicOptional.get();
+        Topic topic = optionalTopic.get();
         Arrays.stream(topic.getMembersInQueue()).forEach(topic::removeFromQueue);
 
         channel.sendMessage(String.format(
