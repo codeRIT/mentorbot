@@ -8,10 +8,10 @@ import net.dv8tion.jda.api.utils.ChunkingFilter;
 
 import javax.security.auth.login.LoginException;
 
-public class Lehrry {
+public class Mentorbot {
     public static void main(String[] args) {
         try {
-            JDA jda = JDABuilder.createDefault(System.getenv("LEHRRY_TOKEN"))
+            JDA jda = JDABuilder.createDefault(System.getenv("MENTORBOT_TOKEN"))
                     .setChunkingFilter(ChunkingFilter.ALL)
                     .enableIntents(GatewayIntent.GUILD_MESSAGES)
                     .addEventListeners(new MainEventListener())
