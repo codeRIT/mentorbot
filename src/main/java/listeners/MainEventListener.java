@@ -82,7 +82,7 @@ public class MainEventListener extends ListenerAdapter {
         TextChannel channel = event.getChannel();
 
         String guildID = event.getGuild().getId();
-        Server server = servers.computeIfAbsent(guildID, k -> Server.load(event.getGuild()));
+        Server server = servers.computeIfAbsent(guildID, k -> new Server(event.getGuild()));
 
         // pick the correct method to call
         CommandHandler commandHandler;

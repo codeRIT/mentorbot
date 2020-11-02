@@ -14,8 +14,19 @@ public class Server {
     private final Guild guild;
     private final ArrayList<Topic> topics = new ArrayList<>();
 
+    /**
+     * Constructs a Server object from a Guild's role list.
+     * @param guild The Guild that this object is associated with
+     */
     public Server(Guild guild) {
         this.guild = guild;
+        List<Role> roles = guild.getRoles();
+        for (Role role : roles) {
+            String name = role.getName();
+            if (name.startsWith("Topic | ")) {
+                topics.add(new Topic(name.substring(8)));
+            }
+        }
     }
 
     @Override
@@ -51,22 +62,5 @@ public class Server {
      */
     public Topic[] getTopics() {
         return topics.toArray(new Topic[0]);
-    }
-
-    /**
-     * Constructs a Server object from a Guild's role list.
-     * @param guild The guild to build from
-     * @return A Server with all topics added
-     */
-    public static Server load(Guild guild) {
-        Server server = new Server(guild);
-        List<Role> roles = guild.getRoles();
-        for (Role role : roles) {
-            String name = role.getName();
-            if (name.startsWith("Topic | ")) {
-                server.topics.add(new Topic(name.substring(8)));
-            }
-        }
-        return server;
     }
 }
