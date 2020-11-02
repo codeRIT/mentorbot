@@ -118,7 +118,7 @@ public class MainEventListener extends ListenerAdapter {
     }
 
     private void makeTopic(Member member, TextChannel channel, Server server, String[] args) {
-        if (!checkAdmin(member, channel)) return;
+        if (!checkAdmin(member, channel)) return;  // do not allow non-admins to run command
 
         Topic topic = new Topic(args[0]);
         server.createTopic(topic);
@@ -130,7 +130,7 @@ public class MainEventListener extends ListenerAdapter {
     }
 
     private void deleteTopic(Member member, TextChannel channel, Server server, String[] args) {
-        if (!checkAdmin(member, channel)) return;
+        if (!checkAdmin(member, channel)) return;  // do not allow non-admins to run command
 
         Arrays.stream(server.getTopics())                   // loop over all topics...
                 .filter(t -> t.getName().equals(args[0]))   // ...if this topic's name is args[0]...
@@ -155,6 +155,7 @@ public class MainEventListener extends ListenerAdapter {
     }
 
     private void queue(Member member, TextChannel channel, Server server, String[] args) {
+        // do not run if topic does not exist
         Optional<Topic> optionalTopic = checkTopicExists(member, channel, server, args[0]);
         if (optionalTopic.isEmpty()) return;
 
@@ -175,8 +176,9 @@ public class MainEventListener extends ListenerAdapter {
     }
 
     private void ready(Member member, TextChannel channel, Server server, String[] args) {
-        if (!checkAdmin(member, channel)) return;
+        if (!checkAdmin(member, channel)) return;  // do not allow non-admins to run command
 
+        // do not run if topic does not exist
         Optional<Topic> optionalTopic = checkTopicExists(member, channel, server, args[0]);
         if (optionalTopic.isEmpty()) return;
 
@@ -189,6 +191,7 @@ public class MainEventListener extends ListenerAdapter {
     }
 
     private void showQueue(Member member, TextChannel channel, Server server, String[] args) {
+        // do not run if topic does not exist
         Optional<Topic> optionalTopic = checkTopicExists(member, channel, server, args[0]);
         if (optionalTopic.isEmpty()) return;
 
@@ -212,8 +215,9 @@ public class MainEventListener extends ListenerAdapter {
     }
 
     private void clear(Member member, TextChannel channel, Server server, String[] args) {
-        if (!checkAdmin(member, channel)) return;
+        if (!checkAdmin(member, channel)) return;  // do not allow non-admins to run command
 
+        // do not run if topic does not exist
         Optional<Topic> optionalTopic = checkTopicExists(member, channel, server, args[0]);
         if (optionalTopic.isEmpty()) return;
 
