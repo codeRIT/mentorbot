@@ -120,7 +120,9 @@ public class MainEventListener extends ListenerAdapter {
     private void makeTopic(Member member, TextChannel channel, Server server, String[] args) {
         if (!checkAdmin(member, channel)) return;  // do not allow non-admins to run command
 
-        Topic topic = new Topic(args[0]);
+        String topicName = args[0];
+
+        Topic topic = new Topic(topicName);
         server.createTopic(topic);
 
         channel.sendMessage(String.format(
@@ -132,8 +134,10 @@ public class MainEventListener extends ListenerAdapter {
     private void deleteTopic(Member member, TextChannel channel, Server server, String[] args) {
         if (!checkAdmin(member, channel)) return;  // do not allow non-admins to run command
 
+        String topicName = args[0];
+
         Arrays.stream(server.getTopics())                   // loop over all topics...
-                .filter(t -> t.getName().equals(args[0]))   // ...if this topic's name is args[0]...
+                .filter(t -> t.getName().equals(topicName))   // ...if this topic's name is args[0]...
                 .findFirst()
                 .ifPresent(server::deleteTopic);            // ...delete it
 
@@ -155,8 +159,10 @@ public class MainEventListener extends ListenerAdapter {
     }
 
     private void queue(Member member, TextChannel channel, Server server, String[] args) {
+        String topicName = args[0];
+
         // do not run if topic does not exist
-        Optional<Topic> optionalTopic = checkTopicExists(member, channel, server, args[0]);
+        Optional<Topic> optionalTopic = checkTopicExists(member, channel, server, topicName);
         if (optionalTopic.isEmpty()) return;
 
         Topic topic = optionalTopic.get();
@@ -165,21 +171,23 @@ public class MainEventListener extends ListenerAdapter {
             channel.sendMessage(String.format(
                     "%s has left the \"%s\" queue.",
                     member.getAsMention(),
-                    args[0])).queue();
+                    topicName)).queue();
         } else {
             topic.addToQueue(member);
             channel.sendMessage(String.format(
                     "%s has joined the \"%s\" queue.",
                     member.getAsMention(),
-                    args[0])).queue();
+                    topicName)).queue();
         }
     }
 
     private void ready(Member member, TextChannel channel, Server server, String[] args) {
         if (!checkAdmin(member, channel)) return;  // do not allow non-admins to run command
 
+        String topicName = args[0];
+
         // do not run if topic does not exist
-        Optional<Topic> optionalTopic = checkTopicExists(member, channel, server, args[0]);
+        Optional<Topic> optionalTopic = checkTopicExists(member, channel, server, topicName);
         if (optionalTopic.isEmpty()) return;
 
         Topic topic = optionalTopic.get();
@@ -191,8 +199,10 @@ public class MainEventListener extends ListenerAdapter {
     }
 
     private void showQueue(Member member, TextChannel channel, Server server, String[] args) {
+        String topicName = args[0];
+
         // do not run if topic does not exist
-        Optional<Topic> optionalTopic = checkTopicExists(member, channel, server, args[0]);
+        Optional<Topic> optionalTopic = checkTopicExists(member, channel, server, topicName);
         if (optionalTopic.isEmpty()) return;
 
         Topic topic = optionalTopic.get();
@@ -217,8 +227,10 @@ public class MainEventListener extends ListenerAdapter {
     private void clear(Member member, TextChannel channel, Server server, String[] args) {
         if (!checkAdmin(member, channel)) return;  // do not allow non-admins to run command
 
+        String topicName = args[0];
+
         // do not run if topic does not exist
-        Optional<Topic> optionalTopic = checkTopicExists(member, channel, server, args[0]);
+        Optional<Topic> optionalTopic = checkTopicExists(member, channel, server, topicName);
         if (optionalTopic.isEmpty()) return;
 
         Topic topic = optionalTopic.get();
