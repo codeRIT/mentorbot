@@ -11,6 +11,8 @@ import java.util.List;
  * a Guild's role list.
  */
 public class Server {
+    public static final String TOPIC_PREFIX = "Topic | ";
+
     private final Guild guild;
     private final ArrayList<Topic> topics = new ArrayList<>();
 
@@ -51,7 +53,7 @@ public class Server {
      * @param topic The Topic to remove
      */
     public void deleteTopic(Topic topic) {
-        guild.getRolesByName("Topic | " + topic.getName(), true)
+        guild.getRolesByName(TOPIC_PREFIX + topic.getName(), true)
                 .forEach((role -> role.delete().queue()));
         topics.remove(topic);
     }
