@@ -25,7 +25,7 @@ public class Server {
         List<Role> roles = guild.getRoles();
         for (Role role : roles) {
             String name = role.getName();
-            if (name.startsWith("Topic | ")) {
+            if (name.startsWith(TOPIC_PREFIX)) {
                 topics.add(new Topic(name.substring(8)));
             }
         }
@@ -42,7 +42,7 @@ public class Server {
      */
     public void createTopic(Topic topic) {
         guild.createRole()
-                .setName("Topic | " + topic.getName())
+                .setName(TOPIC_PREFIX + topic.getName())
                 .setMentionable(true)
                 .queue();
         topics.add(topic);
