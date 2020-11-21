@@ -37,7 +37,7 @@ public class MainEventListener extends ListenerAdapter {
      * @param member The Member to check
      * @return True if the Member has admin, false otherwise
      */
-    private static boolean checkAdmin(Member member) {
+    private static boolean isAdmin(Member member) {
         return member.hasPermission(Permission.ADMINISTRATOR);
     }
 
@@ -47,7 +47,7 @@ public class MainEventListener extends ListenerAdapter {
      * @param topic The Topic to check
      * @return True if the Member has permission, false otherwise
      */
-    private static boolean checkRole(Member member, Topic topic) {
+    private static boolean hasRole(Member member, Topic topic) {
         return member.getRoles()
                 .stream()
                 .anyMatch(r -> r.getName().equals(Server.TOPIC_PREFIX + topic.getName()));
@@ -127,7 +127,7 @@ public class MainEventListener extends ListenerAdapter {
 
     private void makeTopic(Member member, TextChannel channel, Server server, String[] args) {
         // do not allow non-admins to run command
-        if (!checkAdmin(member)) {
+        if (!isAdmin(member)) {
             channel.sendMessage(member.getAsMention() + " You must have administrator permission to run this command.").queue();
             return;
         }
@@ -145,7 +145,7 @@ public class MainEventListener extends ListenerAdapter {
 
     private void deleteTopic(Member member, TextChannel channel, Server server, String[] args) {
         // do not allow non-admins to run command
-        if (!checkAdmin(member)) {
+        if (!isAdmin(member)) {
             channel.sendMessage(member.getAsMention() + " You must have administrator permission to run this command.").queue();
             return;
         }
@@ -206,7 +206,7 @@ public class MainEventListener extends ListenerAdapter {
 
         // do not run if caller does not have mentor role for this topic or admin privileges
         Topic topic = optionalTopic.get();
-        if (!checkRole(member, topic) && !checkAdmin(member)) {
+        if (!hasRole(member, topic) && !isAdmin(member)) {
             channel.sendMessage(member.getAsMention() + " You do not have permission to run this command.").queue();
             return;
         }
@@ -253,7 +253,7 @@ public class MainEventListener extends ListenerAdapter {
 
         // do not run if caller does not have mentor role for this topic or admin privileges
         Topic topic = optionalTopic.get();
-        if (!checkRole(member, topic) && !checkAdmin(member)) {
+        if (!hasRole(member, topic) && !isAdmin(member)) {
             channel.sendMessage(member.getAsMention() + " You do not have permission to run this command.").queue();
             return;
         }
