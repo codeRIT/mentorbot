@@ -35,4 +35,4 @@ using our hosted bot instead, the invite link specified at the top of "Installat
 
 ## Usage
 
-Command usage can be found in our [wiki page](https://github.com/codeRIT/mentorbot/wiki/Commands).
+A quick setup guide and info about commands can be found in our [wiki](https://github.com/codeRIT/mentorbot/wiki).
