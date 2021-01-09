@@ -11,8 +11,6 @@ import java.util.List;
  * a Guild's role list.
  */
 public class Server {
-    public static final String TOPIC_PREFIX = "Topic | ";
-
     private final Guild guild;
     private final ArrayList<Topic> topics = new ArrayList<>();
 
@@ -25,7 +23,7 @@ public class Server {
         List<Role> roles = guild.getRoles();
         for (Role role : roles) {
             String name = role.getName();
-            if (name.startsWith(TOPIC_PREFIX)) {
+            if (name.startsWith(Topic.PREFIX)) {
                 topics.add(new Topic(name.substring(8)));
             }
         }
@@ -42,7 +40,7 @@ public class Server {
      */
     public void createTopic(Topic topic) {
         guild.createRole()
-                .setName(TOPIC_PREFIX + topic.getName())
+                .setName(topic.getRoleName())
                 .setMentionable(true)
                 .queue();
         topics.add(topic);
@@ -53,7 +51,7 @@ public class Server {
      * @param topic The Topic to remove
      */
     public void deleteTopic(Topic topic) {
-        guild.getRolesByName(TOPIC_PREFIX + topic.getName(), true)
+        guild.getRolesByName(topic.getRoleName(), true)
                 .forEach((role -> role.delete().queue()));
         topics.remove(topic);
     }

@@ -50,7 +50,7 @@ public class MainEventListener extends ListenerAdapter {
     private static boolean hasRole(Member member, Topic topic) {
         return member.getRoles()
                 .stream()
-                .anyMatch(r -> r.getName().equals(Server.TOPIC_PREFIX + topic.getName()));
+                .anyMatch(r -> r.getName().equals(topic.getRoleName()));
     }
 
     /**
