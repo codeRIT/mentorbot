@@ -73,9 +73,7 @@ public class MainEventListener extends ListenerAdapter {
      * @return Contains the Topic, if it exists
      */
     private static Optional<Topic> checkTopicExists(Member member, TextChannel channel, Server server, String topic) {
-        Optional<Topic> optionalTopic = Arrays.stream(server.getTopics())
-                .filter(t -> t.getName().equalsIgnoreCase(topic))
-                .findFirst();
+        Optional<Topic> optionalTopic = server.getTopic(topic);
         if (optionalTopic.isEmpty()) {
             channel.sendMessage(String.format(
                     "%s Topic \"%s\" does not exist.",
@@ -150,9 +148,7 @@ public class MainEventListener extends ListenerAdapter {
         }
 
         String topicName = args[0];
-
-        Topic topic = new Topic(topicName);
-        server.createTopic(topic);
+        server.createTopic(topicName);
 
         channel.sendMessage(String.format(
                 "%s Topic role \"%s\" has been created.",
@@ -168,11 +164,7 @@ public class MainEventListener extends ListenerAdapter {
         }
 
         String topicName = args[0];
-
-        Arrays.stream(server.getTopics())                   // loop over all topics...
-                .filter(t -> t.getName().equals(topicName))   // ...if this topic's name is args[0]...
-                .findFirst()
-                .ifPresent(server::deleteTopic);            // ...delete it
+        server.deleteTopic(topicName);
 
         channel.sendMessage(String.format(
                 "%s Topic role \"%s\" has been deleted.",

@@ -3,8 +3,8 @@ package entities;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.swing.text.html.Option;
+import java.util.*;
 
 /**
  * An object that provides methods to store Topic information into
@@ -14,7 +14,7 @@ public class Server {
     public static final String TOPIC_PREFIX = "Topic | ";
 
     private final Guild guild;
-    private final ArrayList<Topic> topics = new ArrayList<>();
+    private final HashMap<String, Topic> topics = new HashMap<>();
 
     /**
      * Constructs a Server object from a Guild's role list.
@@ -26,7 +26,7 @@ public class Server {
         for (Role role : roles) {
             String name = role.getName();
             if (name.startsWith(TOPIC_PREFIX)) {
-                topics.add(new Topic(name.substring(8)));
+                topics.put(name.substring(8), new Topic(name.substring(8), role));
             }
         }
     }
@@ -38,14 +38,13 @@ public class Server {
 
     /**
      * Creates a new Topic role in this server.
-     * @param topic The Topic to add
+     * @param topicName The name for the new topic
      */
-    public void createTopic(Topic topic) {
+    public void createTopic(String topicName) {
         guild.createRole()
-                .setName(TOPIC_PREFIX + topic.getName())
+                .setName(TOPIC_PREFIX + topicName)
                 .setMentionable(true)
-                .queue();
-        topics.add(topic);
+                .queue(role -> topics.put(topicName, new Topic(topicName, role)));
     }
 
     /**
@@ -53,9 +52,18 @@ public class Server {
      * @param topic The Topic to remove
      */
     public void deleteTopic(Topic topic) {
-        guild.getRolesByName(TOPIC_PREFIX + topic.getName(), true)
-                .forEach((role -> role.delete().queue()));
-        topics.remove(topic);
+        if (topic != null) {
+            topic.getRole().delete().queue();
+            topics.remove(topic.getName());
+        }
+    }
+
+    /**
+     * Deletes the Topic role from this server.
+     * @param topicName The name of the Topic to remove
+     */
+    public void deleteTopic(String topicName) {
+        deleteTopic(topics.get(topicName));
     }
 
     /**
@@ -67,6 +75,15 @@ public class Server {
          The Java runtime will automatically expand the passed-in array to fit the
          contents of `topics` in a performant, thread-safe manner.
          */
-        return topics.toArray(new Topic[0]);
+        return topics.values().toArray(new Topic[0]);
+    }
+
+    /**
+     * Gets the Topic with the specified name
+     * @param topicName The name of the Topic to retrieve
+     * @return The Topic object, or null if the Topic does not exist
+     */
+    public Optional<Topic> getTopic(String topicName) {
+        return Optional.ofNullable(topics.get(topicName));
     }
 }
