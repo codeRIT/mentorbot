@@ -1,6 +1,7 @@
 package entities;
 
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
 
 import java.util.LinkedList;
 
@@ -9,15 +10,18 @@ import java.util.LinkedList;
  */
 public class Topic {
     private final String name;
+    private final Role role;
     private final LinkedList<Member> queue = new LinkedList<>();
 
     /**
      * Constructs a new Topic object. This does not automatically create
      * the topic on the Discord server.
      * @param name The name of the topic.
+     * @param role The Role that represents this in the guild
      */
-    public Topic(String name) {
+    public Topic(String name, Role role) {
         this.name = name;
+        this.role = role;
     }
 
     /**
@@ -67,5 +71,9 @@ public class Topic {
      */
     public String getName() {
         return name;
+    }
+
+    public Role getRole() {
+        return role;
     }
 }
