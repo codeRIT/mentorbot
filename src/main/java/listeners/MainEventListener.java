@@ -42,15 +42,26 @@ public class MainEventListener extends ListenerAdapter {
     }
 
     /**
-     * Check if the given Member has the role associated with a topic.
+     * Check if the given Member is a mentor for a topic.
      * @param member The Member to check
      * @param topic The Topic to check
      * @return True if the Member has permission, false otherwise
      */
-    private static boolean hasRole(Member member, Topic topic) {
+    private static boolean isMentor(Member member, Topic topic) {
         return member.getRoles()
                 .stream()
                 .anyMatch(r -> r.getName().equals(topic.getRoleName()));
+    }
+
+    /**
+     * Check if the given Member is a mentor for any topic.
+     * @param member The Member to check
+     * @return True if the Member is a mentor, false otherwise
+     */
+    private static boolean isMentor(Member member) {
+        return member.getRoles()
+                .stream()
+                .anyMatch(r -> r.getName().startsWith(Server.TOPIC_PREFIX));
     }
 
     /**
@@ -62,9 +73,7 @@ public class MainEventListener extends ListenerAdapter {
      * @return Contains the Topic, if it exists
      */
     private static Optional<Topic> checkTopicExists(Member member, TextChannel channel, Server server, String topic) {
-        Optional<Topic> optionalTopic = Arrays.stream(server.getTopics())
-                .filter(t -> t.getName().equalsIgnoreCase(topic))
-                .findFirst();
+        Optional<Topic> optionalTopic = server.getTopic(topic);
         if (optionalTopic.isEmpty()) {
             channel.sendMessage(String.format(
                     "%s Topic \"%s\" does not exist.",
@@ -117,10 +126,16 @@ public class MainEventListener extends ListenerAdapter {
         embedBuilder.addField("$queue <topic>", "Add yourself to a queue.", false);
         embedBuilder.addField("$showqueue <topic>", "Show the people currently in queue.", false);
         embedBuilder.addField("$showtopics", "List all topics.", false);
-        embedBuilder.addField("$ready <topic> (mentor only)", "Retrieve the next person from the queue.", false);
-        embedBuilder.addField("$clear <topic> (mentor only)", "Clear the specified queue.", false);
-        embedBuilder.addField("$maketopic <name> (admin only)", "Create a new topic.", false);
-        embedBuilder.addField("$deletetopic <name> (admin only)", "Delete a topic.", false);
+
+        if (isMentor(member)) {
+            embedBuilder.addField("$ready <topic> (mentor only)", "Retrieve the next person from the queue.", false);
+            embedBuilder.addField("$clear <topic> (mentor only)", "Clear the specified queue.", false);
+        }
+
+        if (isAdmin(member)) {
+            embedBuilder.addField("$maketopic <name> (admin only)", "Create a new topic.", false);
+            embedBuilder.addField("$deletetopic <name> (admin only)", "Delete a topic.", false);
+        }
 
         channel.sendMessage(embedBuilder.build()).queue();
     }
@@ -133,9 +148,7 @@ public class MainEventListener extends ListenerAdapter {
         }
 
         String topicName = args[0];
-
-        Topic topic = new Topic(topicName);
-        server.createTopic(topic);
+        server.createTopic(topicName);
 
         channel.sendMessage(String.format(
                 "%s Topic role \"%s\" has been created.",
@@ -151,11 +164,7 @@ public class MainEventListener extends ListenerAdapter {
         }
 
         String topicName = args[0];
-
-        Arrays.stream(server.getTopics())                   // loop over all topics...
-                .filter(t -> t.getName().equals(topicName))   // ...if this topic's name is args[0]...
-                .findFirst()
-                .ifPresent(server::deleteTopic);            // ...delete it
+        server.deleteTopic(topicName);
 
         channel.sendMessage(String.format(
                 "%s Topic role \"%s\" has been deleted.",
@@ -206,7 +215,7 @@ public class MainEventListener extends ListenerAdapter {
 
         // do not run if caller does not have mentor role for this topic or admin privileges
         Topic topic = optionalTopic.get();
-        if (!hasRole(member, topic) && !isAdmin(member)) {
+        if (!isMentor(member, topic) && !isAdmin(member)) {
             channel.sendMessage(member.getAsMention() + " You do not have permission to run this command.").queue();
             return;
         }
@@ -253,7 +262,7 @@ public class MainEventListener extends ListenerAdapter {
 
         // do not run if caller does not have mentor role for this topic or admin privileges
         Topic topic = optionalTopic.get();
-        if (!hasRole(member, topic) && !isAdmin(member)) {
+        if (!isMentor(member, topic) && !isAdmin(member)) {
             channel.sendMessage(member.getAsMention() + " You do not have permission to run this command.").queue();
             return;
         }
