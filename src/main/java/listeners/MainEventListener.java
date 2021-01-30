@@ -61,7 +61,7 @@ public class MainEventListener extends ListenerAdapter {
     private static boolean isMentor(Member member) {
         return member.getRoles()
                 .stream()
-                .anyMatch(r -> r.getName().startsWith(Server.TOPIC_PREFIX));
+                .anyMatch(r -> r.getName().startsWith(Topic.PREFIX));
     }
 
     /**
