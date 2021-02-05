@@ -3,7 +3,6 @@ package entities;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
 
-import javax.swing.text.html.Option;
 import java.util.*;
 
 /**
