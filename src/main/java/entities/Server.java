@@ -36,7 +36,7 @@ public class Server {
         for (Role role : roles) {
             String name = role.getName();
             if (name.startsWith(TOPIC_PREFIX)) {
-                topics.put(name.substring(8), new Topic(name.substring(8), role, category));
+                topics.put(name.substring(8).toLowerCase(), new Topic(name.substring(8), role, category));
             }
         }
     }
@@ -73,7 +73,7 @@ public class Server {
      * @param topicName The name of the Topic to remove
      */
     public void deleteTopic(String topicName) {
-        deleteTopic(topics.get(topicName));
+        deleteTopic(topics.get(topicName.toLowerCase()));
     }
 
     /**
@@ -94,6 +94,6 @@ public class Server {
      * @return The Topic object, or null if the Topic does not exist
      */
     public Optional<Topic> getTopic(String topicName) {
-        return Optional.ofNullable(topics.get(topicName));
+        return Optional.ofNullable(topics.get(topicName.toLowerCase()));
     }
 }
