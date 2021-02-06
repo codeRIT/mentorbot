@@ -1,5 +1,6 @@
 package entities;
 
+import net.dv8tion.jda.api.entities.Category;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Role;
 
@@ -11,8 +12,10 @@ import java.util.*;
  */
 public class Server {
     public static final String TOPIC_PREFIX = "Topic | ";
+    public static final String MENTORING_CATEGORY_NAME = "Mentoring";
 
     private final Guild guild;
+    private final Category category;
     private final HashMap<String, Topic> topics = new HashMap<>();
 
     /**
@@ -21,11 +24,19 @@ public class Server {
      */
     public Server(Guild guild) {
         this.guild = guild;
+
+        // setup mentoring channel category
+        Optional<Category> optionalCategory = guild.getCategoriesByName(MENTORING_CATEGORY_NAME, false)
+            .stream()
+            .findFirst();
+        category = optionalCategory.orElseGet(() -> guild.createCategory(MENTORING_CATEGORY_NAME).complete());
+
+        // setup roles
         List<Role> roles = guild.getRoles();
         for (Role role : roles) {
             String name = role.getName();
             if (name.startsWith(TOPIC_PREFIX)) {
-                topics.put(name.substring(8), new Topic(name.substring(8), role));
+                topics.put(name.substring(8), new Topic(name.substring(8), role, category));
             }
         }
     }
@@ -43,7 +54,7 @@ public class Server {
         guild.createRole()
                 .setName(TOPIC_PREFIX + topicName)
                 .setMentionable(true)
-                .queue(role -> topics.put(topicName, new Topic(topicName, role)));
+                .queue(role -> topics.put(topicName, new Topic(topicName, role, category)));
     }
 
     /**

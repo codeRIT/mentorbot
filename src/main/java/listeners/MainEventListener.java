@@ -221,10 +221,12 @@ public class MainEventListener extends ListenerAdapter {
         }
 
         Member mentee = topic.getNextFromQueue();
+        TextChannel newChannel = topic.setupChannel();
         channel.sendMessage(String.format(
-                "%s is ready for %s.",
+                "%s is ready for %s in %s.",
                 member.getAsMention(),
-                mentee.getAsMention())).queue();
+                mentee.getAsMention(),
+                newChannel.getAsMention())).queue();
     }
 
     private void showQueue(Member member, TextChannel channel, Server server, String[] args) {
