@@ -1,23 +1,74 @@
 package entities;
 
 import net.dv8tion.jda.api.entities.Category;
+import net.dv8tion.jda.api.entities.Invite;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.VoiceChannel;
+import net.dv8tion.jda.api.requests.restaction.InviteAction;
 
 import java.util.LinkedList;
+import java.util.Optional;
 
 /**
  * A topic for a server. Internally contains a queue of Members.
  */
 public class Topic {
+    public class Channels {
+        private final TextChannel textChannel;
+        private final VoiceChannel voiceChannel;
+
+        public Channels() {
+            deleteExisting();
+
+            textChannel = category.createTextChannel(name).complete();
+            textChannel.putPermissionOverride(mentee).complete();
+
+            voiceChannel = category.createVoiceChannel(name).complete();
+            voiceChannel.putPermissionOverride(mentee).complete();
+        }
+
+        public void delete() {
+            textChannel.delete().complete();
+            voiceChannel.delete().complete();
+        }
+
+        public void deleteExisting() {
+            Optional<TextChannel> optionalTextChannel = category.getTextChannels().stream()
+                .filter(tc -> tc.getName().equals(name.toLowerCase()))  // text channels are lowercase
+                .findFirst();
+            optionalTextChannel.ifPresent(tc -> tc.delete().complete());
+
+            Optional<VoiceChannel> optionalVoiceChannel = category.getVoiceChannels().stream()
+                .filter(vc -> vc.getName().equals(name))
+                .findFirst();
+            optionalVoiceChannel.ifPresent(vc -> vc.delete().complete());
+        }
+
+        public Invite getVoiceChannelInvite() {
+            InviteAction action = voiceChannel.createInvite();
+            action.setMaxAge(5 * 60);  // 5 minutes, to prevent hitting the invite cap
+            action.setMaxUses(2);
+            return action.complete();
+        }
+
+        public TextChannel getTextChannel() {
+            return this.textChannel;
+        }
+
+        public VoiceChannel getVoiceChannel() {
+            return this.voiceChannel;
+        }
+    }
+
     private final String name;
     private final Role role;
     private final Category category;
     private final LinkedList<Member> queue = new LinkedList<>();
 
     private Member mentee = null;
-    private TextChannel channel = null;
+    private Channels channels = null;
 
     /**
      * Constructs a new Topic object. This does not automatically create
@@ -81,20 +132,19 @@ public class Topic {
      * current mentee as an authorized user. If a channel already
      * exists, it will be deleted.
      */
-    public TextChannel setupChannel() {
-        deleteChannel();
-
-        channel = category.createTextChannel(name).complete();
-        channel.putPermissionOverride(mentee).complete();
-        return channel;
+    public Channels setupChannels() {
+        deleteChannels();
+        channels = new Channels();
+        return channels;
     }
 
     /**
      * Deletes this topic's text channel, if it exists.
      */
-    public void deleteChannel() {
-        if (channel != null) {
-            channel.delete().complete();
+    public void deleteChannels() {
+        if (channels != null) {
+            channels.delete();
+            channels = null;
         }
     }
 

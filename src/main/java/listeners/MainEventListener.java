@@ -2,6 +2,7 @@ package listeners;
 
 import entities.Server;
 import entities.Topic;
+import entities.Topic.Channels;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
@@ -221,12 +222,13 @@ public class MainEventListener extends ListenerAdapter {
         }
 
         Member mentee = topic.getNextFromQueue();
-        TextChannel newChannel = topic.setupChannel();
+        Channels newChannels = topic.setupChannels();
         channel.sendMessage(String.format(
-                "%s is ready for %s in %s.",
-                member.getAsMention(),
-                mentee.getAsMention(),
-                newChannel.getAsMention())).queue();
+            "%s is ready for %s.\n\nText channel: %s\nVoice channel: %s",
+            member.getAsMention(),
+            mentee.getAsMention(),
+            newChannels.getTextChannel().getAsMention(),
+            newChannels.getVoiceChannelInvite().getUrl())).queue();
     }
 
     private void showQueue(Member member, TextChannel channel, Server server, String[] args) {
