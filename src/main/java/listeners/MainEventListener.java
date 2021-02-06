@@ -1,8 +1,8 @@
 package listeners;
 
+import entities.Room;
 import entities.Server;
 import entities.Topic;
-import entities.Topic.Channels;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
@@ -224,13 +224,13 @@ public class MainEventListener extends ListenerAdapter {
         }
 
         Member mentee = topic.getNextFromQueue();
-        Channels newChannels = topic.setupChannels();
+        Room room = topic.createRoom(mentee);
         channel.sendMessage(String.format(
             "%s is ready for %s.\n\nText channel: %s\nVoice channel: %s",
             member.getAsMention(),
             mentee.getAsMention(),
-            newChannels.getTextChannel().getAsMention(),
-            newChannels.getVoiceChannelInvite().getUrl())).queue();
+            room.getTextChannel().getAsMention(),
+            room.getVoiceChannelInvite().getUrl())).queue();
     }
 
     private void showQueue(Member member, TextChannel channel, Server server, String[] args) {
@@ -282,7 +282,7 @@ public class MainEventListener extends ListenerAdapter {
     }
 
     private void finish(Member member, TextChannel channel, Server server, String[] args) {
-        // only run inside a topic's text channel
+        // only run inside a room
         Optional<Topic> optionalTopic = server.getTopic(channel.getName());
         if (optionalTopic.isEmpty()) {
             channel.sendMessage(String.format(
@@ -297,8 +297,6 @@ public class MainEventListener extends ListenerAdapter {
             channel.sendMessage(member.getAsMention() + " You do not have permission to run this command.").queue();
             return;
         }
-
-        topic.deleteChannels();
     }
 
     private void unknownCommand(Member member, TextChannel channel, Server server, String[] args) {

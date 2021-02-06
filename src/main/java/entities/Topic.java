@@ -1,13 +1,10 @@
 package entities;
 
 import net.dv8tion.jda.api.entities.Category;
-import net.dv8tion.jda.api.entities.Invite;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.VoiceChannel;
-import net.dv8tion.jda.api.requests.restaction.InviteAction;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Optional;
 
@@ -15,60 +12,11 @@ import java.util.Optional;
  * A topic for a server. Internally contains a queue of Members.
  */
 public class Topic {
-    public class Channels {
-        private final TextChannel textChannel;
-        private final VoiceChannel voiceChannel;
-
-        public Channels() {
-            deleteExisting();
-
-            textChannel = category.createTextChannel(name).complete();
-            textChannel.putPermissionOverride(mentee).complete();
-
-            voiceChannel = category.createVoiceChannel(name).complete();
-            voiceChannel.putPermissionOverride(mentee).complete();
-        }
-
-        public void delete() {
-            textChannel.delete().complete();
-            voiceChannel.delete().complete();
-        }
-
-        public void deleteExisting() {
-            Optional<TextChannel> optionalTextChannel = category.getTextChannels().stream()
-                .filter(tc -> tc.getName().equals(name.toLowerCase()))  // text channels are lowercase
-                .findFirst();
-            optionalTextChannel.ifPresent(tc -> tc.delete().complete());
-
-            Optional<VoiceChannel> optionalVoiceChannel = category.getVoiceChannels().stream()
-                .filter(vc -> vc.getName().equals(name))
-                .findFirst();
-            optionalVoiceChannel.ifPresent(vc -> vc.delete().complete());
-        }
-
-        public Invite getVoiceChannelInvite() {
-            InviteAction action = voiceChannel.createInvite();
-            action.setMaxAge(5 * 60);  // 5 minutes, to prevent hitting the invite cap
-            action.setMaxUses(2);
-            return action.complete();
-        }
-
-        public TextChannel getTextChannel() {
-            return this.textChannel;
-        }
-
-        public VoiceChannel getVoiceChannel() {
-            return this.voiceChannel;
-        }
-    }
-
     private final String name;
     private final Role role;
     private final Category category;
     private final LinkedList<Member> queue = new LinkedList<>();
-
-    private Member mentee = null;
-    private Channels channels = null;
+    private final HashMap<Integer, Room> rooms = new HashMap<>();
 
     /**
      * Constructs a new Topic object. This does not automatically create
@@ -118,34 +66,42 @@ public class Topic {
     }
 
     /**
-     * Remove and return the next Member in the queue. This also
-     * automatically sets `mentee`.
+     * Remove and return the next Member in the queue.
      * @return The new mentee
      */
     public Member getNextFromQueue() {
-        mentee = queue.remove();
-        return mentee;
+        return queue.remove();
     }
 
     /**
-     * Creates a new text channel for this Topic and adds the
-     * current mentee as an authorized user. If a channel already
-     * exists, it will be deleted.
+     * Create a new mentoring room for this topic.
+     * @param mentor The mentor for this room
+     * @param mentee The mentee for this room
+     * @return The new Room
      */
-    public Channels setupChannels() {
-        deleteChannels();
-        channels = new Channels();
-        return channels;
-    }
-
-    /**
-     * Deletes this topic's text channel, if it exists.
-     */
-    public void deleteChannels() {
-        if (channels != null) {
-            channels.delete();
-            channels = null;
+    public Room createRoom(Member mentee) {
+        // get the lowest unused number
+        int number = 1;
+        for (int i = 1; i <= rooms.size(); i++) {
+            if (rooms.get((Integer)i) == null) {
+                number = i;
+                break;
+            }
         }
+
+        Room room = new Room(this, number, mentee);
+        rooms.put(number, room);
+        return room;
+    }
+
+    public void deleteRoom(Room room) {
+        rooms.remove(room.getNumber());
+    }
+
+    public Optional<Room> getRoom(String name) {
+        return rooms.values().stream()
+            .filter(r -> r.getName().equals(name))
+            .findFirst();
     }
 
     /**
@@ -158,5 +114,9 @@ public class Topic {
 
     public Role getRole() {
         return role;
+    }
+
+    public Category getCategory() {
+        return category;
     }
 }
