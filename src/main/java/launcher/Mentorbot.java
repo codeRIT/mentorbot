@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.utils.ChunkingFilter;
 import javax.security.auth.login.LoginException;
 
 public class Mentorbot {
+    @SuppressWarnings("unused")
     public static void main(String[] args) {
         try {
             JDA jda = JDABuilder.createDefault(System.getenv("MENTORBOT_TOKEN"))
