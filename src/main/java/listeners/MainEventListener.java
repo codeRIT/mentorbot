@@ -31,6 +31,9 @@ public class MainEventListener extends ListenerAdapter {
         void handle(@NotNull Member member, TextChannel channel, Server server, String[] args);
     }
 
+    /**
+     * Map from a server name to a Server object.
+     */
     private final HashMap<String, Server> servers = new HashMap<>();
 
     /**

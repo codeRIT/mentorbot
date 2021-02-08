@@ -14,8 +14,19 @@ public class Server {
     public static final String TOPIC_PREFIX = "Topic | ";
     public static final String MENTORING_CATEGORY_NAME = "Mentoring";
 
+    /**
+     * The Guild that this Server represents
+     */
     private final Guild guild;
-    private final Category category;
+
+    /**
+     * The Category to place mentoring rooms into
+     */
+    private final Category mentoringCategory;
+
+    /**
+     * Map from topic names to Topic objects
+     */
     private final HashMap<String, Topic> topics = new HashMap<>();
 
     /**
@@ -29,18 +40,22 @@ public class Server {
         Optional<Category> optionalCategory = guild.getCategoriesByName(MENTORING_CATEGORY_NAME, false)
             .stream()
             .findFirst();
-        category = optionalCategory.orElseGet(() -> guild.createCategory(MENTORING_CATEGORY_NAME).complete());
+        mentoringCategory = optionalCategory.orElseGet(() -> guild.createCategory(MENTORING_CATEGORY_NAME).complete());
 
         // setup roles
         List<Role> roles = guild.getRoles();
         for (Role role : roles) {
             String name = role.getName();
             if (name.startsWith(TOPIC_PREFIX)) {
-                topics.put(name.substring(8).toLowerCase(), new Topic(name.substring(8), role, category));
+                topics.put(name.substring(8).toLowerCase(), new Topic(name.substring(8), role, mentoringCategory));
             }
         }
     }
 
+    /**
+     * Used for comparison between two Server objects. Servers pointing
+     * to the same Guild object return the same hash.
+     */
     @Override
     public int hashCode() {
         return guild.getName().hashCode();
@@ -54,7 +69,7 @@ public class Server {
         guild.createRole()
                 .setName(TOPIC_PREFIX + topicName)
                 .setMentionable(true)
-                .queue(role -> topics.put(topicName, new Topic(topicName, role, category)));
+                .queue(role -> topics.put(topicName, new Topic(topicName, role, mentoringCategory)));
     }
 
     /**

@@ -12,10 +12,31 @@ import java.util.Optional;
  * A topic for a server. Internally contains a queue of Members.
  */
 public class Topic {
+    /**
+     * This Topic's name
+     */
     private final String name;
+
+    /**
+     * The role associated with this Topic. Members with this Role are
+     * considered mentors for this topic and will have access to mentor-
+     * only commands and mentoring rooms.
+     */
     private final Role role;
+
+    /**
+     * The Category to place mentoring rooms into
+     */
     private final Category category;
+
+    /**
+     * List of members currently in queue
+     */
     private final LinkedList<Member> queue = new LinkedList<>();
+
+    /**
+     * Map from room names to Room objects
+     */
     private final HashMap<String, Room> rooms = new HashMap<>();
 
     /**
@@ -75,7 +96,6 @@ public class Topic {
 
     /**
      * Create a new mentoring room for this topic.
-     * @param mentor The mentor for this room
      * @param mentee The mentee for this room
      * @return The new Room
      */
@@ -94,14 +114,23 @@ public class Topic {
         return room;
     }
 
+    /**
+     * Delete a Room
+     * @param room The Room to delete
+     */
     public void deleteRoom(Room room) {
         room.delete();
         rooms.remove(room.getName());
     }
 
-    public Optional<Room> getRoom(String name) {
+    /**
+     * Geets the Room with the specified name
+     * @param roomName The name of the Room to retrieve
+     * @return The Room object, or null if the Room does not exist
+     */
+    public Optional<Room> getRoom(String roomName) {
         return rooms.values().stream()
-            .filter(r -> r.getName().toLowerCase().equals(name.toLowerCase()))
+            .filter(r -> r.getName().toLowerCase().equals(roomName.toLowerCase()))
             .findFirst();
     }
 

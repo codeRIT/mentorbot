@@ -16,19 +16,36 @@ import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.requests.restaction.InviteAction;
 
 public class Room {
+    /**
+     * The Category that this room's channels exist within
+     */
     private final Category category;
-    private final String name;
-    private final int number;
-    private final Member mentee;
 
+    /**
+     * The name of this room
+     */
+    private final String name;
+
+    /**
+     * The text channel for this room
+     */
     private final TextChannel textChannel;
+
+    /**
+     * The voice channel for this room
+     */
     private final VoiceChannel voiceChannel;
 
+    /**
+     * Create a new room. Existing channels for this room number (e.g. from
+     * before a bot restart) will be deleted automatically.
+     * @param topic The Topic for this room
+     * @param number This room's number
+     * @param mentee The mentee using this room
+     */
     public Room(Topic topic, int number, Member mentee) {
         this.category = topic.getCategory();
         this.name = makeName(topic.getName(), number);
-        this.number = number;
-        this.mentee = mentee;
 
         deleteExisting();
 
@@ -47,6 +64,7 @@ public class Room {
         setChannelPermissions(textChannel, guild.getPublicRole(), allowList);
 
         voiceChannel = category.createVoiceChannel(name).complete();
+        setChannelPermissions(voiceChannel, guild.getPublicRole(), allowList);
     }
 
     /**
@@ -59,23 +77,38 @@ public class Room {
         return String.format("%s-%d", topicName, roomNumber);
     }
 
+    /**
+     * Deny view permissions to `veryoneRole` and allow view permissions to all
+     * roles/members in `allowList`.
+     * @param channel The channel to apply permission overrides to 
+     * @param everyoneRole Reference to `@everyone` role
+     * @param allowList List of roles/members that should have access to this
+     *     channel. The bot's user MUST be in this list.
+     */
     private void setChannelPermissions(GuildChannel channel, IPermissionHolder everyoneRole, Collection<IPermissionHolder> allowList) {
         for (IPermissionHolder holder : allowList) {
-            textChannel.putPermissionOverride(holder)
+            channel.putPermissionOverride(holder)
                 .setAllow(Permission.VIEW_CHANNEL)
                 .complete();
         }
 
-        textChannel.putPermissionOverride(everyoneRole)
+        channel.putPermissionOverride(everyoneRole)
             .setDeny(Permission.VIEW_CHANNEL)
             .complete();
     }
 
+    /**
+     * Delete this room's channels from the server. This object should be disposed
+     * of after calling this method.
+     */
     public void delete() {
         textChannel.delete().complete();
         voiceChannel.delete().complete();
     }
 
+    /**
+     * Delete any existing channels using this name/number
+     */
     public void deleteExisting() {
         Optional<TextChannel> optionalTextChannel = category.getTextChannels().stream()
             .filter(tc -> tc.getName().equals(name.toLowerCase()))  // text channels are lowercase
@@ -88,6 +121,11 @@ public class Room {
         optionalVoiceChannel.ifPresent(vc -> vc.delete().complete());
     }
 
+    /**
+     * Create an invite to this room's voice channel. This invite can be used
+     * twice and expires after 5 minutes.
+     * @return A new Invite for this room's voice channel
+     */
     public Invite getVoiceChannelInvite() {
         InviteAction action = voiceChannel.createInvite();
         action.setMaxAge(5 * 60);  // 5 minutes, to prevent hitting the invite cap
@@ -95,23 +133,27 @@ public class Room {
         return action.complete();
     }
 
-    public Member getMentee() {
-        return this.mentee;
-    }
-
+    /**
+     * Get this room's text channel
+     * @return This room's text channel
+     */
     public TextChannel getTextChannel() {
         return this.textChannel;
     }
 
+    /**
+     * Get this room's voice channel
+     * @return This room's voice channel
+     */
     public VoiceChannel getVoiceChannel() {
         return this.voiceChannel;
     }
 
+    /**
+     * Get this room's name
+     * @return This room's name
+     */
     public String getName() {
         return name;
-    }
-
-    public int getNumber() {
-        return number;
     }
 }
