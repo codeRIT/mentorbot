@@ -1,8 +1,14 @@
 package entities;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Optional;
 
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Category;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.GuildChannel;
+import net.dv8tion.jda.api.entities.IPermissionHolder;
 import net.dv8tion.jda.api.entities.Invite;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -26,12 +32,33 @@ public class Room {
 
         deleteExisting();
 
-        // TODO: restrict permissions
         textChannel = category.createTextChannel(name).complete();
-        textChannel.putPermissionOverride(mentee).complete();
+        Guild guild = textChannel.getGuild();
+        ArrayList<IPermissionHolder> allowList = new ArrayList<IPermissionHolder>() {
+            // makes the linter stop complaining about not having a version UID
+            private static final long serialVersionUID = 1L;
+
+            {
+                add(guild.getMember(guild.getJDA().getSelfUser()));  // allow the bot itself
+                add(topic.getRole());  // allow this topics' mentors
+                add(mentee);  // allow the mentee
+            }
+        };
+        setChannelPermissions(textChannel, guild.getPublicRole(), allowList);
 
         voiceChannel = category.createVoiceChannel(name).complete();
-        voiceChannel.putPermissionOverride(mentee).complete();
+    }
+
+    private void setChannelPermissions(GuildChannel channel, IPermissionHolder everyoneRole, Collection<IPermissionHolder> allowList) {
+        for (IPermissionHolder holder : allowList) {
+            textChannel.putPermissionOverride(holder)
+                .setAllow(Permission.VIEW_CHANNEL)
+                .complete();
+        }
+
+        textChannel.putPermissionOverride(everyoneRole)
+            .setDeny(Permission.VIEW_CHANNEL)
+            .complete();
     }
 
     public void delete() {

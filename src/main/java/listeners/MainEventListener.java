@@ -282,9 +282,20 @@ public class MainEventListener extends ListenerAdapter {
     }
 
     private void finish(Member member, TextChannel channel, Server server, String[] args) {
+        Topic topic = null;
+        Room room = null;
+        
+        // find the topic corresponding to this channel
+        for (Topic t : server.getTopics()) {
+            Optional<Room> optionalRoom = t.getRoom(channel.getName());
+            if (optionalRoom.isPresent()) {
+                topic = t;
+                room = optionalRoom.get();
+            }
+        }
+
         // only run inside a room
-        Optional<Topic> optionalTopic = server.getTopic(channel.getName());
-        if (optionalTopic.isEmpty()) {
+        if (room == null) {
             channel.sendMessage(String.format(
                 "%s This command must be run inside a topic's text channel.",
                 member.getAsMention())).queue();
@@ -292,11 +303,12 @@ public class MainEventListener extends ListenerAdapter {
         }
 
         // do not run if caller does not have mentor role for this topic or admin privileges
-        Topic topic = optionalTopic.get();
         if (!isMentor(member, topic) && !isAdmin(member)) {
             channel.sendMessage(member.getAsMention() + " You do not have permission to run this command.").queue();
             return;
         }
+
+        topic.deleteRoom(room);
     }
 
     private void unknownCommand(Member member, TextChannel channel, Server server, String[] args) {

@@ -16,7 +16,7 @@ public class Topic {
     private final Role role;
     private final Category category;
     private final LinkedList<Member> queue = new LinkedList<>();
-    private final HashMap<Integer, Room> rooms = new HashMap<>();
+    private final HashMap<String, Room> rooms = new HashMap<>();
 
     /**
      * Constructs a new Topic object. This does not automatically create
@@ -82,25 +82,28 @@ public class Topic {
     public Room createRoom(Member mentee) {
         // get the lowest unused number
         int number = 1;
-        for (int i = 1; i <= rooms.size(); i++) {
-            if (rooms.get((Integer)i) == null) {
+        for (int i = 1; i <= rooms.size() + 1; i++) {
+            // TODO: below code is dogshit
+            if (rooms.get(String.format("%s-%d", name, i)) == null) {
                 number = i;
                 break;
             }
         }
 
         Room room = new Room(this, number, mentee);
-        rooms.put(number, room);
+        // TODO: even more dogshit
+        rooms.put(String.format("%s-%d", name, number), room);
         return room;
     }
 
     public void deleteRoom(Room room) {
-        rooms.remove(room.getNumber());
+        room.delete();
+        rooms.remove(room.getName());
     }
 
     public Optional<Room> getRoom(String name) {
         return rooms.values().stream()
-            .filter(r -> r.getName().equals(name))
+            .filter(r -> r.getName().toLowerCase().equals(name.toLowerCase()))
             .findFirst();
     }
 
