@@ -26,7 +26,7 @@ public class Room {
 
     public Room(Topic topic, int number, Member mentee) {
         this.category = topic.getCategory();
-        this.name = String.format("%s-%d", topic.getName(), number);
+        this.name = makeName(topic.getName(), number);
         this.number = number;
         this.mentee = mentee;
 
@@ -47,6 +47,16 @@ public class Room {
         setChannelPermissions(textChannel, guild.getPublicRole(), allowList);
 
         voiceChannel = category.createVoiceChannel(name).complete();
+    }
+
+    /**
+     * Create a Room name from a Topic name and room number.
+     * @param topicName The name of the owning Topic
+     * @param roomNumber The room's number
+     * @return The Room's name
+     */
+    public static String makeName(String topicName, int roomNumber) {
+        return String.format("%s-%d", topicName, roomNumber);
     }
 
     private void setChannelPermissions(GuildChannel channel, IPermissionHolder everyoneRole, Collection<IPermissionHolder> allowList) {

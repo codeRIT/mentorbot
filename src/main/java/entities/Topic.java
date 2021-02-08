@@ -83,16 +83,14 @@ public class Topic {
         // get the lowest unused number
         int number = 1;
         for (int i = 1; i <= rooms.size() + 1; i++) {
-            // TODO: below code is dogshit
-            if (rooms.get(String.format("%s-%d", name, i)) == null) {
+            if (rooms.get(Room.makeName(name, i)) == null) {
                 number = i;
                 break;
             }
         }
 
         Room room = new Room(this, number, mentee);
-        // TODO: even more dogshit
-        rooms.put(String.format("%s-%d", name, number), room);
+        rooms.put(Room.makeName(name, number), room);
         return room;
     }
 
