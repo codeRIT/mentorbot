@@ -23,6 +23,7 @@ public class MainEventListener extends ListenerAdapter {
     private interface CommandHandler {
         /**
          * Handle a single command.
+         * 
          * @param member The member that called the command
          * @param channel The channel that the command was called in
          * @param server The Server that the command was called in
@@ -38,7 +39,9 @@ public class MainEventListener extends ListenerAdapter {
 
     /**
      * Check if the given Member has administrator permissions.
+     * 
      * @param member The Member to check
+     * 
      * @return True if the Member has admin, false otherwise
      */
     private static boolean isAdmin(Member member) {
@@ -47,8 +50,10 @@ public class MainEventListener extends ListenerAdapter {
 
     /**
      * Check if the given Member is a mentor for a topic.
+     * 
      * @param member The Member to check
      * @param topic The Topic to check
+     * 
      * @return True if the Member has permission, false otherwise
      */
     private static boolean isMentor(Member member, Topic topic) {
@@ -59,7 +64,9 @@ public class MainEventListener extends ListenerAdapter {
 
     /**
      * Check if the given Member is a mentor for any topic.
+     * 
      * @param member The Member to check
+     * 
      * @return True if the Member is a mentor, false otherwise
      */
     private static boolean isMentor(Member member) {
@@ -70,10 +77,12 @@ public class MainEventListener extends ListenerAdapter {
 
     /**
      * Check if the given Topic exists in the Server. Notifies the user if the topic does not exist.
+     * 
      * @param member The Member to reply to
      * @param channel The Channel to reply within
      * @param server The Server to check in
      * @param topicName The Topic to check for
+     * 
      * @return Contains the Topic, if it exists
      */
     private static Optional<Topic> checkTopicExists(Member member, TextChannel channel, Server server, String topicName) {

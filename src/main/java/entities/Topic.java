@@ -25,6 +25,7 @@ public class Topic {
     /**
      * Constructs a new Topic object. This does not automatically create
      * the topic on the Discord server.
+     * 
      * @param name The name of the topic.
      * @param role The Role that represents this in the guild
      * @param category The Category that this topic's channels should be
@@ -38,6 +39,7 @@ public class Topic {
 
     /**
      * Add a Member to the back of the queue.
+     * 
      * @param member The Member to add
      */
     public void addToQueue(Member member) {
@@ -46,6 +48,7 @@ public class Topic {
 
     /**
      * Remove a Member from their position in the queue.
+     * 
      * @param member The Member to remove
      */
     public void removeFromQueue(Member member) {
@@ -54,7 +57,9 @@ public class Topic {
 
     /**
      * Check if a Member is inside the queue.
+     * 
      * @param member The Member to check
+     * 
      * @return True if the member is in the queue, false otherwise
      */
     public boolean isInQueue(Member member) {
@@ -63,6 +68,7 @@ public class Topic {
 
     /**
      * Returns an array of all Members in the queue.
+     * 
      * @return The Members in this queue
      */
     public Member[] getMembersInQueue() {
@@ -71,6 +77,7 @@ public class Topic {
 
     /**
      * Remove and return the next Member in the queue.
+     * 
      * @return The new mentee
      */
     public Member getNextFromQueue() {
@@ -79,7 +86,9 @@ public class Topic {
 
     /**
      * Create a new mentoring room for this topic.
+     * 
      * @param mentee The mentee for this room
+     * 
      * @return The new Room
      */
     public Room createRoom(Member mentee) {
@@ -99,6 +108,7 @@ public class Topic {
 
     /**
      * Delete a Room
+     * 
      * @param room The Room to delete
      */
     public void deleteRoom(Room room) {
@@ -108,7 +118,9 @@ public class Topic {
 
     /**
      * Geets the Room with the specified name
+     * 
      * @param roomName The name of the Room to retrieve
+     * 
      * @return The Room object, or null if the Room does not exist
      */
     public Optional<Room> getRoom(String roomName) {
@@ -119,16 +131,27 @@ public class Topic {
 
     /**
      * Get the name of this Topic.
+     * 
      * @return This Topic's name
      */
     public String getName() {
         return name;
     }
 
+    /**
+     * Get the role for this Topic.
+     * 
+     * @return This Topic's role
+     */
     public Role getRole() {
         return role;
     }
 
+    /**
+     * Get the category for this Topic.
+     * 
+     * @return This Topic's category
+     */
     public Category getCategory() {
         return category;
     }
