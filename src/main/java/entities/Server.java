@@ -14,14 +14,7 @@ public class Server {
     public static final String TOPIC_PREFIX = "Topic | ";
     public static final String MENTORING_CATEGORY_NAME = "Mentoring";
 
-    /**
-     * The Guild that this Server represents
-     */
     private final Guild guild;
-
-    /**
-     * The Category to place mentoring rooms into
-     */
     private final Category mentoringCategory;
 
     /**

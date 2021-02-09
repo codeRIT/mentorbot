@@ -15,25 +15,14 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.requests.restaction.InviteAction;
 
+/**
+ * A logical group for a topic's text and voice channels. All mentor-mentee
+ * interactions occur within a mentoring room.
+ */
 public class Room {
-    /**
-     * The Category that this room's channels exist within
-     */
     private final Category category;
-
-    /**
-     * The name of this room
-     */
     private final String name;
-
-    /**
-     * The text channel for this room
-     */
     private final TextChannel textChannel;
-
-    /**
-     * The voice channel for this room
-     */
     private final VoiceChannel voiceChannel;
 
     /**
@@ -78,8 +67,8 @@ public class Room {
     }
 
     /**
-     * Deny view permissions to `veryoneRole` and allow view permissions to all
-     * roles/members in `allowList`.
+     * Deny view permissions to `everyoneRole` and allow view permissions to
+     * all roles/members in `allowList`.
      * @param channel The channel to apply permission overrides to 
      * @param everyoneRole Reference to `@everyone` role
      * @param allowList List of roles/members that should have access to this

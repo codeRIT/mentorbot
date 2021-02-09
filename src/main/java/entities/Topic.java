@@ -12,26 +12,9 @@ import java.util.Optional;
  * A topic for a server. Internally contains a queue of Members.
  */
 public class Topic {
-    /**
-     * This Topic's name
-     */
     private final String name;
-
-    /**
-     * The role associated with this Topic. Members with this Role are
-     * considered mentors for this topic and will have access to mentor-
-     * only commands and mentoring rooms.
-     */
     private final Role role;
-
-    /**
-     * The Category to place mentoring rooms into
-     */
     private final Category category;
-
-    /**
-     * List of members currently in queue
-     */
     private final LinkedList<Member> queue = new LinkedList<>();
 
     /**
