@@ -80,7 +80,7 @@ public class Topic {
      * 
      * @return The new mentee
      */
-    public Member getNextFromQueue() {
+    public Member popFromQueue() {
         return queue.remove();
     }
 

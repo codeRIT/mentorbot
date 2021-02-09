@@ -235,7 +235,7 @@ public class MainEventListener extends ListenerAdapter {
             return;
         }
 
-        Member mentee = topic.getNextFromQueue();
+        Member mentee = topic.popFromQueue();
         Room room = topic.createRoom(mentee);
         channel.sendMessage(String.format(
             "%s is ready for %s.\n\nText channel: %s\nVoice channel: %s",
