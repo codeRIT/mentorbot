@@ -24,7 +24,10 @@ public class Server {
         for (Role role : roles) {
             String name = role.getName();
             if (name.startsWith(Topic.PREFIX)) {
-                topics.put(name.substring(8), new Topic(name.substring(8), role));
+                topics.put(
+                    name.substring(Topic.PREFIX.length()),
+                    new Topic(name.substring(Topic.PREFIX.length()), role)
+                );
             }
         }
     }
