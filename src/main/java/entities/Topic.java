@@ -92,17 +92,8 @@ public class Topic {
      * @return The new Room
      */
     public Room createRoom(Member mentee) {
-        // get the lowest unused number
-        int number = 1;
-        for (int i = 1; i <= rooms.size() + 1; i++) {
-            if (rooms.get(Room.makeName(name, i)) == null) {
-                number = i;
-                break;
-            }
-        }
-
-        Room room = new Room(this, number, mentee);
-        rooms.put(Room.makeName(name, number), room);
+        Room room = new Room(this, mentee);
+        rooms.put(room.getName(), room);
         return room;
     }
 

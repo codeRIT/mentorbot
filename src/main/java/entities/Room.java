@@ -25,6 +25,8 @@ public class Room {
     private final TextChannel textChannel;
     private final VoiceChannel voiceChannel;
 
+    private static int nextRoomNumber = 1;
+
     /**
      * Create a new room. Existing channels for this room number (e.g. from
      * before a bot restart) will be deleted automatically.
@@ -33,9 +35,10 @@ public class Room {
      * @param number This room's number
      * @param mentee The mentee using this room
      */
-    public Room(Topic topic, int number, Member mentee) {
+    public Room(Topic topic, Member mentee) {
         this.category = topic.getCategory();
-        this.name = makeName(topic.getName(), number);
+        this.name = String.format("%s-%d", topic.getName(), nextRoomNumber);
+        nextRoomNumber++;
 
         deleteExisting();
 
@@ -55,17 +58,6 @@ public class Room {
 
         voiceChannel = category.createVoiceChannel(name).complete();
         setChannelPermissions(voiceChannel, guild.getPublicRole(), allowList);
-    }
-
-    /**
-     * Create a Room name from a Topic name and room number.
-     * 
-     * @param topicName The name of the owning Topic
-     * @param roomNumber The room's number
-     * @return The Room's name
-     */
-    public static String makeName(String topicName, int roomNumber) {
-        return String.format("%s-%d", topicName, roomNumber);
     }
 
     /**
