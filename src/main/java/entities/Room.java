@@ -118,7 +118,7 @@ public class Room {
     public Invite getVoiceChannelInvite() {
         InviteAction action = voiceChannel.createInvite();
         action.setMaxAge(5 * 60);  // 5 minutes, to prevent hitting the invite cap
-        action.setMaxUses(2);
+        action.setMaxUses(5);
         return action.complete();
     }
 
