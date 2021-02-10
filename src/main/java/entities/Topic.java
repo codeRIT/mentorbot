@@ -12,6 +12,8 @@ import java.util.Optional;
  * A topic for a server. Internally contains a queue of Members.
  */
 public class Topic {
+    public static final String PREFIX = "Topic | ";
+
     private final String name;
     private final Role role;
     private final Category category;
@@ -145,5 +147,13 @@ public class Topic {
      */
     public Category getCategory() {
         return category;
+    }
+
+    /**
+     * Get the name of the role representing this Topic.
+     * @return This Topic's role's name
+     */
+    public String getRoleName() {
+        return PREFIX + name;
     }
 }

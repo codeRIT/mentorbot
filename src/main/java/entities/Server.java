@@ -11,9 +11,7 @@ import java.util.*;
  * a Guild's role list.
  */
 public class Server {
-    public static final String TOPIC_PREFIX = "Topic | ";
     public static final String MENTORING_CATEGORY_NAME = "Mentoring";
-
     private final Guild guild;
     private final Category mentoringCategory;
 
@@ -40,8 +38,11 @@ public class Server {
         List<Role> roles = guild.getRoles();
         for (Role role : roles) {
             String name = role.getName();
-            if (name.startsWith(TOPIC_PREFIX)) {
-                topics.put(name.substring(8).toLowerCase(), new Topic(name.substring(8), role, mentoringCategory));
+            if (name.startsWith(Topic.PREFIX)) {
+                topics.put(
+                    name.substring(Topic.PREFIX.length()),
+                    new Topic(name.substring(Topic.PREFIX.length()), role, mentoringCategory)
+                );
             }
         }
     }
@@ -62,7 +63,7 @@ public class Server {
      */
     public void createTopic(String topicName) {
         guild.createRole()
-                .setName(TOPIC_PREFIX + topicName)
+                .setName(Topic.PREFIX + topicName)
                 .setMentionable(true)
                 .queue(role -> topics.put(topicName, new Topic(topicName, role, mentoringCategory)));
     }
