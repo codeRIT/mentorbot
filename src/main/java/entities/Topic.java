@@ -9,6 +9,8 @@ import java.util.LinkedList;
  * A topic for a server. Internally contains a queue of Members.
  */
 public class Topic {
+    public static final String PREFIX = "Topic | ";
+
     private final String name;
     private final Role role;
     private final LinkedList<Member> queue = new LinkedList<>();
@@ -75,5 +77,13 @@ public class Topic {
 
     public Role getRole() {
         return role;
+    }
+
+    /**
+     * Get the name of the role representing this Topic.
+     * @return This Topic's role's name
+     */
+    public String getRoleName() {
+        return PREFIX + name;
     }
 }
