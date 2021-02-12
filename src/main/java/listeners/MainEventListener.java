@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MainEventListener extends ListenerAdapter {
     /**
@@ -199,7 +200,7 @@ public class MainEventListener extends ListenerAdapter {
                     member.getAsMention(),
                     topicName)).queue();
         } else {
-            String message = args[1];
+            String message = Stream.of(args).skip(1).collect(Collectors.joining(" "));
             topic.addToQueue(new QueueMember(member, message));
             channel.sendMessage(String.format(
                     "%s has joined the \"%s\" queue.",
@@ -244,7 +245,7 @@ public class MainEventListener extends ListenerAdapter {
                     topic.getName())).queue();
         } else {
             String menteeList = Arrays.stream(topic.getMembersInQueue())
-                    .map(qm -> qm.getMember().getEffectiveName())
+                    .map(qm -> String.format("%s: %s", qm.getMember().getEffectiveName(), qm.getMessage()))
                     .collect(Collectors.joining("\n"));
 
             channel.sendMessage(String.format(
