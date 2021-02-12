@@ -13,7 +13,7 @@ public class Topic {
 
     private final String name;
     private final Role role;
-    private final LinkedList<Member> queue = new LinkedList<>();
+    private final LinkedList<QueueMember> queue = new LinkedList<>();
 
     /**
      * Constructs a new Topic object. This does not automatically create
@@ -30,7 +30,7 @@ public class Topic {
      * Add a Member to the back of the queue.
      * @param member The Member to add
      */
-    public void addToQueue(Member member) {
+    public void addToQueue(QueueMember member) {
         queue.add(member);
     }
 
@@ -39,6 +39,17 @@ public class Topic {
      * @param member The Member to remove
      */
     public void removeFromQueue(Member member) {
+        int index = queue.indexOf(new QueueMember(member));
+        if (index != -1) {
+            queue.remove(index);
+        }
+    }
+
+    /**
+     * Remove a QueueMember from their position in the queue.
+     * @param member The QueueMember to remove
+     */
+    public void removeFromQueue(QueueMember member) {
         queue.remove(member);
     }
 
@@ -48,22 +59,22 @@ public class Topic {
      * @return True if the member is in the queue, false otherwise
      */
     public boolean isInQueue(Member member) {
-        return queue.contains(member);
+        return queue.contains(new QueueMember(member));
     }
 
     /**
-     * Returns an array of all Members in the queue.
-     * @return The Members in this queue
+     * Returns an array of all QueueMembers in the queue.
+     * @return The QueueMembers in this queue
      */
-    public Member[] getMembersInQueue() {
-        return queue.toArray(new Member[0]);
+    public QueueMember[] getMembersInQueue() {
+        return queue.toArray(new QueueMember[0]);
     }
 
     /**
-     * Remove and return the next Member in the queue.
-     * @return The Member at the front of the queue
+     * Remove and return the next QueueMember in the queue.
+     * @return The QueueMember at the front of the queue
      */
-    public Member getNextFromQueue() {
+    public QueueMember getNextFromQueue() {
         return queue.remove();
     }
 
