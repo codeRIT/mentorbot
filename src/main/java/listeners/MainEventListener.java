@@ -1,7 +1,9 @@
 package listeners;
 
+import entities.Room;
 import entities.Server;
 import entities.Topic;
+import info.BotResponses;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
@@ -22,6 +24,7 @@ public class MainEventListener extends ListenerAdapter {
     private interface CommandHandler {
         /**
          * Handle a single command.
+         *
          * @param member The member that called the command
          * @param channel The channel that the command was called in
          * @param server The Server that the command was called in
@@ -30,11 +33,16 @@ public class MainEventListener extends ListenerAdapter {
         void handle(@NotNull Member member, TextChannel channel, Server server, String[] args);
     }
 
+    /**
+     * Map from a server name to a Server object.
+     */
     private final HashMap<String, Server> servers = new HashMap<>();
 
     /**
      * Check if the given Member has administrator permissions.
+     *
      * @param member The Member to check
+     *
      * @return True if the Member has admin, false otherwise
      */
     private static boolean isAdmin(Member member) {
@@ -43,8 +51,10 @@ public class MainEventListener extends ListenerAdapter {
 
     /**
      * Check if the given Member is a mentor for a topic.
+     *
      * @param member The Member to check
      * @param topic The Topic to check
+     *
      * @return True if the Member has permission, false otherwise
      */
     private static boolean isMentor(Member member, Topic topic) {
@@ -55,7 +65,9 @@ public class MainEventListener extends ListenerAdapter {
 
     /**
      * Check if the given Member is a mentor for any topic.
+     *
      * @param member The Member to check
+     *
      * @return True if the Member is a mentor, false otherwise
      */
     private static boolean isMentor(Member member) {
@@ -66,19 +78,21 @@ public class MainEventListener extends ListenerAdapter {
 
     /**
      * Check if the given Topic exists in the Server. Notifies the user if the topic does not exist.
+     *
      * @param member The Member to reply to
      * @param channel The Channel to reply within
      * @param server The Server to check in
-     * @param topic The Topic to check for
+     * @param topicName The Topic to check for
+     *
      * @return Contains the Topic, if it exists
      */
-    private static Optional<Topic> checkTopicExists(Member member, TextChannel channel, Server server, String topic) {
-        Optional<Topic> optionalTopic = server.getTopic(topic);
+    private static Optional<Topic> checkTopicExists(Member member, TextChannel channel, Server server, String topicName) {
+        Optional<Topic> optionalTopic = server.getTopic(topicName.toLowerCase());
         if (optionalTopic.isEmpty()) {
             channel.sendMessage(String.format(
                     "%s Topic \"%s\" does not exist.",
                     member.getAsMention(),
-                    topic)).queue();
+                    topicName)).queue();
         }
         return optionalTopic;
     }
@@ -112,6 +126,7 @@ public class MainEventListener extends ListenerAdapter {
             case "ready"       -> commandHandler = this::ready;
             case "showqueue"   -> commandHandler = this::showQueue;
             case "clear"       -> commandHandler = this::clear;
+            case "finish"      -> commandHandler = this::finish;
             default            -> commandHandler = this::unknownCommand;
         }
         commandHandler.handle(member, channel, server, args);
@@ -130,6 +145,7 @@ public class MainEventListener extends ListenerAdapter {
         if (isMentor(member)) {
             embedBuilder.addField("$ready <topic> (mentor only)", "Retrieve the next person from the queue.", false);
             embedBuilder.addField("$clear <topic> (mentor only)", "Clear the specified queue.", false);
+            embedBuilder.addField("$finish (mentor only)", "Finish a mentoring session. Must be run inside the text channel for that session.", false);
         }
 
         if (isAdmin(member)) {
@@ -216,15 +232,13 @@ public class MainEventListener extends ListenerAdapter {
         // do not run if caller does not have mentor role for this topic or admin privileges
         Topic topic = optionalTopic.get();
         if (!isMentor(member, topic) && !isAdmin(member)) {
-            channel.sendMessage(member.getAsMention() + " You do not have permission to run this command.").queue();
+            BotResponses.noPermission(channel, member);
             return;
         }
 
-        Member mentee = topic.getNextFromQueue();
-        channel.sendMessage(String.format(
-                "%s is ready for %s.",
-                member.getAsMention(),
-                mentee.getAsMention())).queue();
+        Member mentee = topic.popFromQueue();
+        Room room = topic.createRoom(mentee);
+        BotResponses.mentorIsReady(channel, member, mentee, room);
     }
 
     private void showQueue(Member member, TextChannel channel, Server server, String[] args) {
@@ -235,21 +249,15 @@ public class MainEventListener extends ListenerAdapter {
         if (optionalTopic.isEmpty()) return;
 
         Topic topic = optionalTopic.get();
+
         if (topic.getMembersInQueue().length == 0) {
-            channel.sendMessage(String.format(
-                    "%s Queue \"%s\" is empty.",
-                    member.getAsMention(),
-                    topic.getName())).queue();
+            BotResponses.queueIsEmpty(channel, member, topic);;
         } else {
             String menteeList = Arrays.stream(topic.getMembersInQueue())
                     .map(Member::getEffectiveName)
                     .collect(Collectors.joining("\n"));
 
-            channel.sendMessage(String.format(
-                    "%s Members in \"%s\" queue:\n%s",
-                    member.getAsMention(),
-                    topic.getName(),
-                    menteeList)).queue();
+            BotResponses.showQueueMembers(channel, member, topic, menteeList);
         }
     }
 
@@ -263,19 +271,44 @@ public class MainEventListener extends ListenerAdapter {
         // do not run if caller does not have mentor role for this topic or admin privileges
         Topic topic = optionalTopic.get();
         if (!isMentor(member, topic) && !isAdmin(member)) {
-            channel.sendMessage(member.getAsMention() + " You do not have permission to run this command.").queue();
+            BotResponses.noPermission(channel, member);
             return;
         }
 
         Arrays.stream(topic.getMembersInQueue()).forEach(topic::removeFromQueue);
 
-        channel.sendMessage(String.format(
-                "%s has cleared the \"%s\" queue.",
-                member.getAsMention(),
-                topic.getName())).queue();
+        BotResponses.queueCleared(channel, member, topic);
+    }
+
+    private void finish(Member member, TextChannel channel, Server server, String[] args) {
+        Topic topic = null;
+        Room room = null;
+
+        // find the topic corresponding to this channel
+        for (Topic t : server.getTopics()) {
+            Optional<Room> optionalRoom = t.getRoom(channel.getName());
+            if (optionalRoom.isPresent()) {
+                topic = t;
+                room = optionalRoom.get();
+            }
+        }
+
+        // only run inside a room
+        if (room == null) {
+            BotResponses.runInTopicChannel(channel, member);
+            return;
+        }
+
+        // do not run if caller does not have mentor role for this topic or admin privileges
+        if (!isMentor(member, topic) && !isAdmin(member)) {
+            BotResponses.noPermission(channel, member);
+            return;
+        }
+
+        topic.deleteRoom(room);
     }
 
     private void unknownCommand(Member member, TextChannel channel, Server server, String[] args) {
-        channel.sendMessage(member.getAsMention() + " Command does not exist! Try $help for a list of valid commands.").queue();
+        BotResponses.noSuchCommand(channel, member);
     }
 }
