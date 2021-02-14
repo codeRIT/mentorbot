@@ -27,7 +27,7 @@ public class MainEventListener extends ListenerAdapter {
          * @param server The Server that the command was called in
          * @param args Extra command arguments, if any
          */
-        void handle(@NotNull Member member, TextChannel channel, Server server, String[] args);
+        void handle(@NotNull Member member, TextChannel channel, Server server, String[] args, Member[] mentions);
     }
 
     private final HashMap<String, Server> servers = new HashMap<>();
@@ -97,6 +97,7 @@ public class MainEventListener extends ListenerAdapter {
 
         Member member = Objects.requireNonNull(event.getMember());
         TextChannel channel = event.getChannel();
+        Member[] mentions = event.getMessage().getMentionedMembers().toArray(new Member[0]);
 
         String guildID = event.getGuild().getId();
         Server server = servers.computeIfAbsent(guildID, k -> new Server(event.getGuild()));
@@ -114,10 +115,10 @@ public class MainEventListener extends ListenerAdapter {
             case "clear"       -> commandHandler = this::clear;
             default            -> commandHandler = this::unknownCommand;
         }
-        commandHandler.handle(member, channel, server, args);
+        commandHandler.handle(member, channel, server, args, mentions);
     }
 
-    private void help(Member member, TextChannel channel, Server server, String[] args) {
+    private void help(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("Help!");
         embedBuilder.setDescription("Possible commands:");
@@ -140,7 +141,7 @@ public class MainEventListener extends ListenerAdapter {
         channel.sendMessage(embedBuilder.build()).queue();
     }
 
-    private void makeTopic(Member member, TextChannel channel, Server server, String[] args) {
+    private void makeTopic(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
         // do not allow non-admins to run command
         if (!isAdmin(member)) {
             channel.sendMessage(member.getAsMention() + " You must have administrator permission to run this command.").queue();
@@ -156,7 +157,7 @@ public class MainEventListener extends ListenerAdapter {
                 args[0])).queue();
     }
 
-    private void deleteTopic(Member member, TextChannel channel, Server server, String[] args) {
+    private void deleteTopic(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
         // do not allow non-admins to run command
         if (!isAdmin(member)) {
             channel.sendMessage(member.getAsMention() + " You must have administrator permission to run this command.").queue();
@@ -172,7 +173,7 @@ public class MainEventListener extends ListenerAdapter {
                 args[0])).queue();
     }
 
-    private void showTopics(Member member, TextChannel channel, Server server, String[] args) {
+    private void showTopics(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
         String topicList = Arrays.stream(server.getTopics())
                 .map(Topic::getName)
                 .collect(Collectors.joining("\n"));
@@ -183,7 +184,7 @@ public class MainEventListener extends ListenerAdapter {
                 topicList)).queue();
     }
 
-    private void queue(Member member, TextChannel channel, Server server, String[] args) {
+    private void queue(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
         String topicName = args[0];
 
         // do not run if topic does not exist
@@ -206,7 +207,7 @@ public class MainEventListener extends ListenerAdapter {
         }
     }
 
-    private void ready(Member member, TextChannel channel, Server server, String[] args) {
+    private void ready(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
         String topicName = args[0];
 
         // do not run if topic does not exist
@@ -227,7 +228,7 @@ public class MainEventListener extends ListenerAdapter {
                 mentee.getAsMention())).queue();
     }
 
-    private void showQueue(Member member, TextChannel channel, Server server, String[] args) {
+    private void showQueue(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
         String topicName = args[0];
 
         // do not run if topic does not exist
@@ -253,7 +254,7 @@ public class MainEventListener extends ListenerAdapter {
         }
     }
 
-    private void clear(Member member, TextChannel channel, Server server, String[] args) {
+    private void clear(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
         String topicName = args[0];
 
         // do not run if topic does not exist
@@ -275,7 +276,7 @@ public class MainEventListener extends ListenerAdapter {
                 topic.getName())).queue();
     }
 
-    private void unknownCommand(Member member, TextChannel channel, Server server, String[] args) {
+    private void unknownCommand(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
         channel.sendMessage(member.getAsMention() + " Command does not exist! Try $help for a list of valid commands.").queue();
     }
 }
