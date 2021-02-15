@@ -19,6 +19,10 @@ jar {
     }
 }
 
+shadowJar {
+    archiveFileName = "mentorbot.${extension}"
+}
+
 dependencies {
     testImplementation group: 'junit', name: 'junit', version: '4.12'
     implementation 'net.dv8tion:JDA:4.2.0_198'
