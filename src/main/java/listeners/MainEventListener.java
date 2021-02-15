@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MainEventListener extends ListenerAdapter {
     /**
@@ -30,7 +31,7 @@ public class MainEventListener extends ListenerAdapter {
          * @param server The Server that the command was called in
          * @param args Extra command arguments, if any
          */
-        void handle(@NotNull Member member, TextChannel channel, Server server, String[] args);
+        void handle(@NotNull Member member, TextChannel channel, Server server, String[] args, Member[] mentions);
     }
 
     /**
@@ -108,6 +109,7 @@ public class MainEventListener extends ListenerAdapter {
 
         Member member = Objects.requireNonNull(event.getMember());
         TextChannel channel = event.getChannel();
+        Member[] mentions = event.getMessage().getMentionedMembers().toArray(new Member[0]);
 
         String guildID = event.getGuild().getId();
         Server server = servers.computeIfAbsent(guildID, k -> new Server(event.getGuild()));
@@ -122,14 +124,15 @@ public class MainEventListener extends ListenerAdapter {
             case "queue"       -> commandHandler = this::queue;
             case "ready"       -> commandHandler = this::ready;
             case "showqueue"   -> commandHandler = this::showQueue;
+            case "kick"        -> commandHandler = this::kick;
             case "clear"       -> commandHandler = this::clear;
             case "finish"      -> commandHandler = this::finish;
             default            -> commandHandler = this::unknownCommand;
         }
-        commandHandler.handle(member, channel, server, args);
+        commandHandler.handle(member, channel, server, args, mentions);
     }
 
-    private void help(Member member, TextChannel channel, Server server, String[] args) {
+    private void help(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("Help!");
         embedBuilder.setDescription("Possible commands:");
@@ -139,8 +142,9 @@ public class MainEventListener extends ListenerAdapter {
         embedBuilder.addField("$showqueue <topic>", "Show the people currently in queue.", false);
         embedBuilder.addField("$showtopics", "List all topics.", false);
 
-        if (isMentor(member)) {
+        if (isMentor(member) || isAdmin(member)) {
             embedBuilder.addField("$ready <topic> (mentor only)", "Retrieve the next person from the queue.", false);
+            embedBuilder.addField("$kick <@user> <topic> <reason>", "Kick the specified user from the queue.", false);
             embedBuilder.addField("$clear <topic> (mentor only)", "Clear the specified queue.", false);
             embedBuilder.addField("$finish (mentor only)", "Finish a mentoring session. Must be run inside the text channel for that session.", false);
         }
@@ -153,7 +157,7 @@ public class MainEventListener extends ListenerAdapter {
         channel.sendMessage(embedBuilder.build()).queue();
     }
 
-    private void makeTopic(Member member, TextChannel channel, Server server, String[] args) {
+    private void makeTopic(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
         // do not allow non-admins to run command
         if (!isAdmin(member)) {
             BotResponses.noPermission(channel, member);
@@ -166,7 +170,7 @@ public class MainEventListener extends ListenerAdapter {
         BotResponses.topicCreated(channel, member, topicName);
     }
 
-    private void deleteTopic(Member member, TextChannel channel, Server server, String[] args) {
+    private void deleteTopic(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
         // do not allow non-admins to run command
         if (!isAdmin(member)) {
             BotResponses.noPermission(channel, member);
@@ -179,7 +183,7 @@ public class MainEventListener extends ListenerAdapter {
         BotResponses.topicDeleted(channel, member, topicName);
     }
 
-    private void showTopics(Member member, TextChannel channel, Server server, String[] args) {
+    private void showTopics(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
         String topicList = Arrays.stream(server.getTopics())
                 .map(Topic::getName)
                 .collect(Collectors.joining("\n"));
@@ -187,7 +191,7 @@ public class MainEventListener extends ListenerAdapter {
         BotResponses.sendTopicList(channel, member, topicList);
     }
 
-    private void queue(Member member, TextChannel channel, Server server, String[] args) {
+    private void queue(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
         String topicName = args[0];
 
         // do not run if topic does not exist
@@ -204,7 +208,7 @@ public class MainEventListener extends ListenerAdapter {
         }
     }
 
-    private void ready(Member member, TextChannel channel, Server server, String[] args) {
+    private void ready(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
         String topicName = args[0];
 
         // do not run if topic does not exist
@@ -223,7 +227,7 @@ public class MainEventListener extends ListenerAdapter {
         BotResponses.mentorIsReady(channel, member, mentee, room);
     }
 
-    private void showQueue(Member member, TextChannel channel, Server server, String[] args) {
+    private void showQueue(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
         String topicName = args[0];
 
         // do not run if topic does not exist
@@ -243,7 +247,43 @@ public class MainEventListener extends ListenerAdapter {
         }
     }
 
-    private void clear(Member member, TextChannel channel, Server server, String[] args) {
+    private void kick(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
+        Member mentee = mentions[0];  // also takes up args[0]
+        String topicName = args[1];
+        String reason = Stream.of(args).skip(2).collect(Collectors.joining(" "));
+
+        // do not run if topic does not exist
+        Optional<Topic> optionalTopic = checkTopicExists(member, channel, server, topicName);
+        if (optionalTopic.isEmpty()) return;
+
+        // do not run if caller does not have mentor role for this topic or admin privileges
+        Topic topic = optionalTopic.get();
+        if (!isMentor(member, topic) && !isAdmin(member)) {
+            channel.sendMessage(member.getAsMention() + " You do not have permission to run this command.").queue();
+            return;
+        }
+
+        // do not run if mentee is not in the specified queue
+        if (!topic.isInQueue(mentee)) {
+            channel.sendMessage(String.format(
+                "%s User \"%s\" is not in the queue for topic \"%s\".",
+                member.getAsMention(),
+                mentee.getEffectiveName(),
+                topic.getName()
+            )).queue();
+            return;
+        }
+
+        topic.removeFromQueue(mentee);
+        channel.sendMessage(String.format(
+            "User %s was kicked out of the queue by %s. Reason: %s",
+            mentee.getAsMention(),
+            member.getAsMention(),
+            reason
+        )).queue();
+    }
+
+    private void clear(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
         String topicName = args[0];
 
         // do not run if topic does not exist
@@ -262,21 +302,21 @@ public class MainEventListener extends ListenerAdapter {
         BotResponses.queueCleared(channel, member, topic);
     }
 
-    private void finish(Member member, TextChannel channel, Server server, String[] args) {
+    private void finish(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
         Topic topic = null;
-        Room room = null;
+        Optional<Room> optionalRoom = Optional.empty();
 
         // find the topic corresponding to this channel
         for (Topic t : server.getTopics()) {
-            Optional<Room> optionalRoom = t.getRoom(channel.getName());
+            optionalRoom = t.getRoom(channel.getName());
             if (optionalRoom.isPresent()) {
                 topic = t;
-                room = optionalRoom.get();
+                break;
             }
         }
 
         // only run inside a room
-        if (room == null) {
+        if (optionalRoom.isEmpty()) {
             BotResponses.runInTopicChannel(channel, member);
             return;
         }
@@ -287,10 +327,10 @@ public class MainEventListener extends ListenerAdapter {
             return;
         }
 
-        topic.deleteRoom(room);
+        topic.deleteRoom(optionalRoom.get());
     }
 
-    private void unknownCommand(Member member, TextChannel channel, Server server, String[] args) {
+    private void unknownCommand(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
         BotResponses.noSuchCommand(channel, member);
     }
 }

@@ -30,7 +30,7 @@ public class Room {
     /**
      * Create a new room. Existing channels for this room number (e.g. from
      * before a bot restart) will be deleted automatically.
-     * 
+     *
      * @param topic The Topic for this room
      * @param number This room's number
      * @param mentee The mentee using this room
@@ -44,16 +44,12 @@ public class Room {
 
         textChannel = category.createTextChannel(name).complete();
         Guild guild = textChannel.getGuild();
-        ArrayList<IPermissionHolder> allowList = new ArrayList<IPermissionHolder>() {
-            // makes the linter stop complaining about not having a version UID
-            private static final long serialVersionUID = 1L;
 
-            {
-                add(guild.getMember(guild.getJDA().getSelfUser()));  // allow the bot itself
-                add(topic.getRole());  // allow this topics' mentors
-                add(mentee);  // allow the mentee
-            }
-        };
+        ArrayList<IPermissionHolder> allowList = new ArrayList<IPermissionHolder>();
+        allowList.add(guild.getMember(guild.getJDA().getSelfUser()));  // allow the bot itself
+        allowList.add(topic.getRole());  // allow this topics' mentors
+        allowList.add(mentee);  // allow the mentee
+
         setChannelPermissions(textChannel, guild.getPublicRole(), allowList);
 
         voiceChannel = category.createVoiceChannel(name).complete();
@@ -63,8 +59,8 @@ public class Room {
     /**
      * Deny view permissions to `everyoneRole` and allow view permissions to
      * all roles/members in `allowList`.
-     * 
-     * @param channel The channel to apply permission overrides to 
+     *
+     * @param channel The channel to apply permission overrides to
      * @param everyoneRole Reference to `@everyone` role
      * @param allowList List of roles/members that should have access to this
      *     channel. The bot's user MUST be in this list.
@@ -108,7 +104,7 @@ public class Room {
     /**
      * Create an invite to this room's voice channel. This invite can be used
      * twice and expires after 5 minutes.
-     * 
+     *
      * @return A new Invite for this room's voice channel
      */
     public Invite getVoiceChannelInvite() {
@@ -120,7 +116,7 @@ public class Room {
 
     /**
      * Get this room's text channel
-     * 
+     *
      * @return This room's text channel
      */
     public TextChannel getTextChannel() {
@@ -129,7 +125,7 @@ public class Room {
 
     /**
      * Get this room's voice channel
-     * 
+     *
      * @return This room's voice channel
      */
     public VoiceChannel getVoiceChannel() {
@@ -138,7 +134,7 @@ public class Room {
 
     /**
      * Get this room's name
-     * 
+     *
      * @return This room's name
      */
     public String getName() {
