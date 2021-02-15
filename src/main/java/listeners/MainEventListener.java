@@ -1,6 +1,7 @@
 package listeners;
 
 import entities.QueueMember;
+import entities.Room;
 import entities.Server;
 import entities.Topic;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -24,6 +25,7 @@ public class MainEventListener extends ListenerAdapter {
     private interface CommandHandler {
         /**
          * Handle a single command.
+         *
          * @param member The member that called the command
          * @param channel The channel that the command was called in
          * @param server The Server that the command was called in
@@ -32,11 +34,16 @@ public class MainEventListener extends ListenerAdapter {
         void handle(@NotNull Member member, TextChannel channel, Server server, String[] args);
     }
 
+    /**
+     * Map from a server name to a Server object.
+     */
     private final HashMap<String, Server> servers = new HashMap<>();
 
     /**
      * Check if the given Member has administrator permissions.
+     *
      * @param member The Member to check
+     *
      * @return True if the Member has admin, false otherwise
      */
     private static boolean isAdmin(Member member) {
@@ -45,8 +52,10 @@ public class MainEventListener extends ListenerAdapter {
 
     /**
      * Check if the given Member is a mentor for a topic.
+     *
      * @param member The Member to check
      * @param topic The Topic to check
+     *
      * @return True if the Member has permission, false otherwise
      */
     private static boolean isMentor(Member member, Topic topic) {
@@ -57,7 +66,9 @@ public class MainEventListener extends ListenerAdapter {
 
     /**
      * Check if the given Member is a mentor for any topic.
+     *
      * @param member The Member to check
+     *
      * @return True if the Member is a mentor, false otherwise
      */
     private static boolean isMentor(Member member) {
@@ -68,19 +79,21 @@ public class MainEventListener extends ListenerAdapter {
 
     /**
      * Check if the given Topic exists in the Server. Notifies the user if the topic does not exist.
+     *
      * @param member The Member to reply to
      * @param channel The Channel to reply within
      * @param server The Server to check in
-     * @param topic The Topic to check for
+     * @param topicName The Topic to check for
+     *
      * @return Contains the Topic, if it exists
      */
-    private static Optional<Topic> checkTopicExists(Member member, TextChannel channel, Server server, String topic) {
-        Optional<Topic> optionalTopic = server.getTopic(topic);
+    private static Optional<Topic> checkTopicExists(Member member, TextChannel channel, Server server, String topicName) {
+        Optional<Topic> optionalTopic = server.getTopic(topicName.toLowerCase());
         if (optionalTopic.isEmpty()) {
             channel.sendMessage(String.format(
                     "%s Topic \"%s\" does not exist.",
                     member.getAsMention(),
-                    topic)).queue();
+                    topicName)).queue();
         }
         return optionalTopic;
     }
@@ -114,6 +127,7 @@ public class MainEventListener extends ListenerAdapter {
             case "ready"       -> commandHandler = this::ready;
             case "showqueue"   -> commandHandler = this::showQueue;
             case "clear"       -> commandHandler = this::clear;
+            case "finish"      -> commandHandler = this::finish;
             default            -> commandHandler = this::unknownCommand;
         }
         commandHandler.handle(member, channel, server, args);
@@ -132,6 +146,7 @@ public class MainEventListener extends ListenerAdapter {
         if (isMentor(member)) {
             embedBuilder.addField("$ready <topic> (mentor only)", "Retrieve the next person from the queue.", false);
             embedBuilder.addField("$clear <topic> (mentor only)", "Clear the specified queue.", false);
+            embedBuilder.addField("$finish (mentor only)", "Finish a mentoring session. Must be run inside the text channel for that session.", false);
         }
 
         if (isAdmin(member)) {
@@ -223,11 +238,14 @@ public class MainEventListener extends ListenerAdapter {
             return;
         }
 
-        QueueMember mentee = topic.getNextFromQueue();
+        QueueMember mentee = topic.popFromQueue();
+        Room room = topic.createRoom(mentee.getMember());
         channel.sendMessage(String.format(
-                "%s is ready for %s.",
-                member.getAsMention(),
-                mentee.getMember().getAsMention())).queue();
+            "%s is ready for %s.\n\nText channel: %s\nVoice channel: %s",
+            member.getAsMention(),
+            mentee.getMember().getAsMention(),
+            room.getTextChannel().getAsMention(),
+            room.getVoiceChannelInvite().getUrl())).queue();
     }
 
     private void showQueue(Member member, TextChannel channel, Server server, String[] args) {
@@ -276,6 +294,36 @@ public class MainEventListener extends ListenerAdapter {
                 "%s has cleared the \"%s\" queue.",
                 member.getAsMention(),
                 topic.getName())).queue();
+    }
+
+    private void finish(Member member, TextChannel channel, Server server, String[] args) {
+        Topic topic = null;
+        Optional<Room> optionalRoom = Optional.empty();
+
+        // find the topic corresponding to this channel
+        for (Topic t : server.getTopics()) {
+            optionalRoom = t.getRoom(channel.getName());
+            if (optionalRoom.isPresent()) {
+                topic = t;
+                break;
+            }
+        }
+
+        // only run inside a room
+        if (optionalRoom.isEmpty()) {
+            channel.sendMessage(String.format(
+                "%s This command must be run inside a topic's text channel.",
+                member.getAsMention())).queue();
+            return;
+        }
+
+        // do not run if caller does not have mentor role for this topic or admin privileges
+        if (!isMentor(member, topic) && !isAdmin(member)) {
+            channel.sendMessage(member.getAsMention() + " You do not have permission to run this command.").queue();
+            return;
+        }
+
+        topic.deleteRoom(optionalRoom.get());
     }
 
     private void unknownCommand(Member member, TextChannel channel, Server server, String[] args) {
