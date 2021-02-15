@@ -1,1 +1,1 @@
-web: java -jar build/libs/mentorbot.jar
+bot: java -jar build/libs/mentorbot.jar
