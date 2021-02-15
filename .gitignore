@@ -47,3 +47,4 @@ gradle-app.setting
 .classpath
 .project
 org.eclipse.buildship.core.prefs
+.vscode/
