@@ -89,10 +89,7 @@ public class MainEventListener extends ListenerAdapter {
     private static Optional<Topic> checkTopicExists(Member member, TextChannel channel, Server server, String topicName) {
         Optional<Topic> optionalTopic = server.getTopic(topicName.toLowerCase());
         if (optionalTopic.isEmpty()) {
-            channel.sendMessage(String.format(
-                    "%s Topic \"%s\" does not exist.",
-                    member.getAsMention(),
-                    topicName)).queue();
+            BotResponses.noSuchTopic(channel, member, topicName);
         }
         return optionalTopic;
     }
@@ -159,33 +156,27 @@ public class MainEventListener extends ListenerAdapter {
     private void makeTopic(Member member, TextChannel channel, Server server, String[] args) {
         // do not allow non-admins to run command
         if (!isAdmin(member)) {
-            channel.sendMessage(member.getAsMention() + " You must have administrator permission to run this command.").queue();
+            BotResponses.noPermission(channel, member);
             return;
         }
 
         String topicName = args[0];
         server.createTopic(topicName);
 
-        channel.sendMessage(String.format(
-                "%s Topic role \"%s\" has been created.",
-                member.getAsMention(),
-                args[0])).queue();
+        BotResponses.topicCreated(channel, member, topicName);
     }
 
     private void deleteTopic(Member member, TextChannel channel, Server server, String[] args) {
         // do not allow non-admins to run command
         if (!isAdmin(member)) {
-            channel.sendMessage(member.getAsMention() + " You must have administrator permission to run this command.").queue();
+            BotResponses.noPermission(channel, member);
             return;
         }
 
         String topicName = args[0];
         server.deleteTopic(topicName);
 
-        channel.sendMessage(String.format(
-                "%s Topic role \"%s\" has been deleted.",
-                member.getAsMention(),
-                args[0])).queue();
+        BotResponses.topicDeleted(channel, member, topicName);
     }
 
     private void showTopics(Member member, TextChannel channel, Server server, String[] args) {
@@ -193,10 +184,7 @@ public class MainEventListener extends ListenerAdapter {
                 .map(Topic::getName)
                 .collect(Collectors.joining("\n"));
 
-        channel.sendMessage(String.format(
-                "%s List of topics:\n%s",
-                member.getAsMention(),
-                topicList)).queue();
+        BotResponses.sendTopicList(channel, member, topicList);
     }
 
     private void queue(Member member, TextChannel channel, Server server, String[] args) {
@@ -209,16 +197,10 @@ public class MainEventListener extends ListenerAdapter {
         Topic topic = optionalTopic.get();
         if (topic.isInQueue(member)) {
             topic.removeFromQueue(member);
-            channel.sendMessage(String.format(
-                    "%s has left the \"%s\" queue.",
-                    member.getAsMention(),
-                    topicName)).queue();
+            BotResponses.leftQueue(channel, member, topicName);
         } else {
             topic.addToQueue(member);
-            channel.sendMessage(String.format(
-                    "%s has joined the \"%s\" queue.",
-                    member.getAsMention(),
-                    topicName)).queue();
+            BotResponses.joinedQueue(channel, member, topicName);
         }
     }
 
