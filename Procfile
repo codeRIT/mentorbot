@@ -1,1 +1,1 @@
-web: java -jar build/libs/mentorbot-1.0-SNAPSHOT-all.jar
+web: java -jar build/libs/mentorbot.jar
