@@ -40,7 +40,7 @@ public class Server {
             String name = role.getName();
             if (name.startsWith(Topic.PREFIX)) {
                 topics.put(
-                    name.toLowerCase().substring(Topic.PREFIX.length()),
+                    name.substring(Topic.PREFIX.length()),
                     new Topic(name.substring(Topic.PREFIX.length()), role, mentoringCategory)
                 );
             }

@@ -40,7 +40,11 @@ gradle-app.setting
 # Cache of project
 .gradletasknamecache
 
-
-
 ## INTELLIJ - custom
 /.idea/
+
+# VSCode language server files
+.classpath
+.project
+org.eclipse.buildship.core.prefs
+.vscode/
