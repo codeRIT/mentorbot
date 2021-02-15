@@ -113,6 +113,23 @@ public class BotResponses {
     }
 
     /**
+     * Letting the mentor know that a mentee is not in the queue
+     *
+     * @param channel The text channel to send message to
+     * @param member The mentor to be pinged/mentioned
+     * @param mentee The mentee who is not in the queue
+     * @param topic The topic that the mentee is not queued for
+     */
+    public static void notInQueue(TextChannel channel, Member member, Member mentee, Topic topic) {
+        channel.sendMessage(String.format(
+                "%s User \"%s\" is not in the queue for topic \"%s\".",
+                member.getAsMention(),
+                mentee.getEffectiveName(),
+                topic.getName()
+            )).queue();
+    }
+
+    /**
      * Notifing the user that they have successfully joined the queue
      *
      * @param channel The text channel to send message to
@@ -138,6 +155,23 @@ public class BotResponses {
                     "%s has left the \"%s\" queue.",
                     member.getAsMention(),
                     topicName)).queue();
+    }
+
+    /**
+     * Notifying a mentee that they have been kicked from a queue
+     *
+     * @param channel The text channel to send message to
+     * @param member The member who kicked them
+     * @param mentee The mentee who was kicked and is being notified
+     * @param reason The reason the mentee was kicked
+     */
+    public static void kickedFromQueue(TextChannel channel, Member member, Member mentee, String reason) {
+        channel.sendMessage(String.format(
+            "User %s was kicked out of the queue by %s. Reason: %s",
+            mentee.getAsMention(),
+            member.getAsMention(),
+            reason
+        )).queue();
     }
 
     /**

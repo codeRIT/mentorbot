@@ -160,7 +160,7 @@ public class MainEventListener extends ListenerAdapter {
     private void makeTopic(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
         // do not allow non-admins to run command
         if (!isAdmin(member)) {
-            BotResponses.noPermission(channel, member);
+            BotResponses.noAdminPermission(channel, member);
             return;
         }
 
@@ -173,7 +173,7 @@ public class MainEventListener extends ListenerAdapter {
     private void deleteTopic(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
         // do not allow non-admins to run command
         if (!isAdmin(member)) {
-            BotResponses.noPermission(channel, member);
+            BotResponses.noAdminPermission(channel, member);
             return;
         }
 
@@ -259,28 +259,18 @@ public class MainEventListener extends ListenerAdapter {
         // do not run if caller does not have mentor role for this topic or admin privileges
         Topic topic = optionalTopic.get();
         if (!isMentor(member, topic) && !isAdmin(member)) {
-            channel.sendMessage(member.getAsMention() + " You do not have permission to run this command.").queue();
+            BotResponses.noPermission(channel, member);
             return;
         }
 
         // do not run if mentee is not in the specified queue
         if (!topic.isInQueue(mentee)) {
-            channel.sendMessage(String.format(
-                "%s User \"%s\" is not in the queue for topic \"%s\".",
-                member.getAsMention(),
-                mentee.getEffectiveName(),
-                topic.getName()
-            )).queue();
+            BotResponses.notInQueue(channel, member, mentee, topic);
             return;
         }
 
         topic.removeFromQueue(mentee);
-        channel.sendMessage(String.format(
-            "User %s was kicked out of the queue by %s. Reason: %s",
-            mentee.getAsMention(),
-            member.getAsMention(),
-            reason
-        )).queue();
+        BotResponses.kickedFromQueue(channel, member, mentee, reason);
     }
 
     private void clear(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
