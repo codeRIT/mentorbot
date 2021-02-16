@@ -4,6 +4,8 @@ import entities.QueueMember;
 import entities.Room;
 import entities.Server;
 import entities.Topic;
+import info.BotResponses;
+import info.Config;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
@@ -40,14 +42,19 @@ public class MainEventListener extends ListenerAdapter {
     private final HashMap<String, Server> servers = new HashMap<>();
 
     /**
-     * Check if the given Member has administrator permissions.
+     * Check if the given Member has administrator permissions or an
+     * administrator role.
      *
      * @param member The Member to check
      *
-     * @return True if the Member has admin, false otherwise
+     * @return True if the Member is an admin, false otherwise
      */
     private static boolean isAdmin(Member member) {
-        return member.hasPermission(Permission.ADMINISTRATOR);
+        boolean hasAdminPermission = member.hasPermission(Permission.ADMINISTRATOR);
+        boolean hasAdminRole = member.getRoles().stream()
+            .anyMatch(r -> Config.ADMIN_ROLES.contains(r.getName()));
+
+        return hasAdminPermission || hasAdminRole;
     }
 
     /**
@@ -90,10 +97,7 @@ public class MainEventListener extends ListenerAdapter {
     private static Optional<Topic> checkTopicExists(Member member, TextChannel channel, Server server, String topicName) {
         Optional<Topic> optionalTopic = server.getTopic(topicName.toLowerCase());
         if (optionalTopic.isEmpty()) {
-            channel.sendMessage(String.format(
-                    "%s Topic \"%s\" does not exist.",
-                    member.getAsMention(),
-                    topicName)).queue();
+            BotResponses.noSuchTopic(channel, member, topicName);
         }
         return optionalTopic;
     }
@@ -163,33 +167,27 @@ public class MainEventListener extends ListenerAdapter {
     private void makeTopic(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
         // do not allow non-admins to run command
         if (!isAdmin(member)) {
-            channel.sendMessage(member.getAsMention() + " You must have administrator permission to run this command.").queue();
+            BotResponses.noAdminPermission(channel, member);
             return;
         }
 
         String topicName = args[0];
         server.createTopic(topicName);
 
-        channel.sendMessage(String.format(
-                "%s Topic role \"%s\" has been created.",
-                member.getAsMention(),
-                args[0])).queue();
+        BotResponses.topicCreated(channel, member, topicName);
     }
 
     private void deleteTopic(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
         // do not allow non-admins to run command
         if (!isAdmin(member)) {
-            channel.sendMessage(member.getAsMention() + " You must have administrator permission to run this command.").queue();
+            BotResponses.noAdminPermission(channel, member);
             return;
         }
 
         String topicName = args[0];
         server.deleteTopic(topicName);
 
-        channel.sendMessage(String.format(
-                "%s Topic role \"%s\" has been deleted.",
-                member.getAsMention(),
-                args[0])).queue();
+        BotResponses.topicDeleted(channel, member, topicName);
     }
 
     private void showTopics(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
@@ -197,10 +195,7 @@ public class MainEventListener extends ListenerAdapter {
                 .map(Topic::getName)
                 .collect(Collectors.joining("\n"));
 
-        channel.sendMessage(String.format(
-                "%s List of topics:\n%s",
-                member.getAsMention(),
-                topicList)).queue();
+        BotResponses.sendTopicList(channel, member, topicList);
     }
 
     private void queue(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
@@ -213,17 +208,11 @@ public class MainEventListener extends ListenerAdapter {
         Topic topic = optionalTopic.get();
         if (topic.isInQueue(member)) {
             topic.removeFromQueue(member);
-            channel.sendMessage(String.format(
-                    "%s has left the \"%s\" queue.",
-                    member.getAsMention(),
-                    topicName)).queue();
+            BotResponses.leftQueue(channel, member, topicName);
         } else {
             String message = Stream.of(args).skip(1).collect(Collectors.joining(" "));
             topic.addToQueue(new QueueMember(member, message));
-            channel.sendMessage(String.format(
-                    "%s has joined the \"%s\" queue.",
-                    member.getAsMention(),
-                    topicName)).queue();
+            BotResponses.joinedQueue(channel, member, topicName);
         }
     }
 
@@ -237,18 +226,13 @@ public class MainEventListener extends ListenerAdapter {
         // do not run if caller does not have mentor role for this topic or admin privileges
         Topic topic = optionalTopic.get();
         if (!isMentor(member, topic) && !isAdmin(member)) {
-            channel.sendMessage(member.getAsMention() + " You do not have permission to run this command.").queue();
+            BotResponses.noPermission(channel, member);
             return;
         }
 
         QueueMember mentee = topic.popFromQueue();
         Room room = topic.createRoom(mentee.getMember());
-        channel.sendMessage(String.format(
-            "%s is ready for %s.\n\nText channel: %s\nVoice channel: %s",
-            member.getAsMention(),
-            mentee.getMember().getAsMention(),
-            room.getTextChannel().getAsMention(),
-            room.getVoiceChannelInvite().getUrl())).queue();
+        BotResponses.mentorIsReady(channel, member, mentee.getMember(), room);
     }
 
     private void showQueue(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
@@ -259,21 +243,14 @@ public class MainEventListener extends ListenerAdapter {
         if (optionalTopic.isEmpty()) return;
 
         Topic topic = optionalTopic.get();
+
         if (topic.getMembersInQueue().length == 0) {
-            channel.sendMessage(String.format(
-                    "%s Queue \"%s\" is empty.",
-                    member.getAsMention(),
-                    topic.getName())).queue();
+            BotResponses.queueIsEmpty(channel, member, topic);;
         } else {
             String menteeList = Arrays.stream(topic.getMembersInQueue())
-                    .map(qm -> String.format("%s: %s", qm.getMember().getEffectiveName(), qm.getMessage()))
-                    .collect(Collectors.joining("\n"));
-
-            channel.sendMessage(String.format(
-                    "%s Members in \"%s\" queue:\n%s",
-                    member.getAsMention(),
-                    topic.getName(),
-                    menteeList)).queue();
+                .map(qm -> String.format("%s: %s", qm.getMember().getEffectiveName(), qm.getMessage()))
+                .collect(Collectors.joining("\n"));
+            BotResponses.showQueueMembers(channel, member, topic, menteeList);
         }
     }
 
@@ -289,28 +266,18 @@ public class MainEventListener extends ListenerAdapter {
         // do not run if caller does not have mentor role for this topic or admin privileges
         Topic topic = optionalTopic.get();
         if (!isMentor(member, topic) && !isAdmin(member)) {
-            channel.sendMessage(member.getAsMention() + " You do not have permission to run this command.").queue();
+            BotResponses.noPermission(channel, member);
             return;
         }
 
         // do not run if mentee is not in the specified queue
         if (!topic.isInQueue(mentee)) {
-            channel.sendMessage(String.format(
-                "%s User \"%s\" is not in the queue for topic \"%s\".",
-                member.getAsMention(),
-                mentee.getEffectiveName(),
-                topic.getName()
-            )).queue();
+            BotResponses.notInQueue(channel, member, mentee, topic);
             return;
         }
 
         topic.removeFromQueue(mentee);
-        channel.sendMessage(String.format(
-            "User %s was kicked out of the queue by %s. Reason: %s",
-            mentee.getAsMention(),
-            member.getAsMention(),
-            reason
-        )).queue();
+        BotResponses.kickedFromQueue(channel, member, mentee, reason);
     }
 
     private void clear(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
@@ -323,16 +290,13 @@ public class MainEventListener extends ListenerAdapter {
         // do not run if caller does not have mentor role for this topic or admin privileges
         Topic topic = optionalTopic.get();
         if (!isMentor(member, topic) && !isAdmin(member)) {
-            channel.sendMessage(member.getAsMention() + " You do not have permission to run this command.").queue();
+            BotResponses.noPermission(channel, member);
             return;
         }
 
         Arrays.stream(topic.getMembersInQueue()).forEach(topic::removeFromQueue);
 
-        channel.sendMessage(String.format(
-                "%s has cleared the \"%s\" queue.",
-                member.getAsMention(),
-                topic.getName())).queue();
+        BotResponses.queueCleared(channel, member, topic);
     }
 
     private void finish(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
@@ -350,15 +314,13 @@ public class MainEventListener extends ListenerAdapter {
 
         // only run inside a room
         if (optionalRoom.isEmpty()) {
-            channel.sendMessage(String.format(
-                "%s This command must be run inside a topic's text channel.",
-                member.getAsMention())).queue();
+            BotResponses.runInTopicChannel(channel, member);
             return;
         }
 
         // do not run if caller does not have mentor role for this topic or admin privileges
         if (!isMentor(member, topic) && !isAdmin(member)) {
-            channel.sendMessage(member.getAsMention() + " You do not have permission to run this command.").queue();
+            BotResponses.noPermission(channel, member);
             return;
         }
 
@@ -366,6 +328,6 @@ public class MainEventListener extends ListenerAdapter {
     }
 
     private void unknownCommand(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
-        channel.sendMessage(member.getAsMention() + " Command does not exist! Try $help for a list of valid commands.").queue();
+        BotResponses.noSuchCommand(channel, member);
     }
 }
