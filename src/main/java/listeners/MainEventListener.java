@@ -209,8 +209,9 @@ public class MainEventListener extends ListenerAdapter {
         }
 
         String topicList = Arrays.stream(server.getTopics())
-                .map(Topic::getName)
-                .collect(Collectors.joining("\n"));
+            .sorted(Comparator.comparing(t -> t.getName()))
+            .map(Topic::getName)
+            .collect(Collectors.joining("\n"));
 
         BotResponses.sendTopicList(channel, member, topicList);
     }
