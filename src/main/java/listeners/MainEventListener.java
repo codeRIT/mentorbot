@@ -110,7 +110,7 @@ public class MainEventListener extends ListenerAdapter {
     @Override
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
         String[] tokens = event.getMessage().getContentDisplay().split(" ");
-        if (!tokens[0].startsWith("$")) return;
+        if (!tokens[0].startsWith(Config.COMMAND_PREFIX)) return;
         String[] args = Arrays.copyOfRange(tokens, 1, tokens.length);
 
         Member member = Objects.requireNonNull(event.getMember());
@@ -170,6 +170,10 @@ public class MainEventListener extends ListenerAdapter {
             return;
         }
 
+        if (args.length != 1) {
+            BotResponses.invalidParameters(channel, member, "maketopic <topic>");
+        }
+
         String topicName = args[0];
         server.createTopic(topicName);
 
@@ -183,6 +187,10 @@ public class MainEventListener extends ListenerAdapter {
             return;
         }
 
+        if (args.length != 1) {
+            BotResponses.invalidParameters(channel, member, "deletetopic <topic>");
+        }
+
         String topicName = args[0];
         server.deleteTopic(topicName);
 
@@ -190,6 +198,10 @@ public class MainEventListener extends ListenerAdapter {
     }
 
     private void showTopics(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
+        if (args.length != 0) {
+            BotResponses.invalidParameters(channel, member, "showtopics");
+        }
+
         String topicList = Arrays.stream(server.getTopics())
                 .map(Topic::getName)
                 .collect(Collectors.joining("\n"));
@@ -198,6 +210,10 @@ public class MainEventListener extends ListenerAdapter {
     }
 
     private void queue(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
+        if (args.length != 1) {
+            BotResponses.invalidParameters(channel, member, "queue <topic>");
+        }
+
         String topicName = args[0];
 
         // do not run if topic does not exist
