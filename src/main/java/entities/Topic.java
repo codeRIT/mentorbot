@@ -17,7 +17,7 @@ public class Topic {
     private final String name;
     private final Role role;
     private final Category category;
-    private final LinkedList<Member> queue = new LinkedList<>();
+    private final LinkedList<QueueMember> queue = new LinkedList<>();
 
     /**
      * Map from room names to Room objects
@@ -27,7 +27,7 @@ public class Topic {
     /**
      * Constructs a new Topic object. This does not automatically create
      * the topic on the Discord server.
-     * 
+     *
      * @param name The name of the topic.
      * @param role The Role that represents this in the guild
      * @param category The Category that this topic's channels should be
@@ -41,59 +41,67 @@ public class Topic {
 
     /**
      * Add a Member to the back of the queue.
-     * 
+     *
      * @param member The Member to add
      */
-    public void addToQueue(Member member) {
+    public void addToQueue(QueueMember member) {
         queue.add(member);
     }
 
     /**
      * Remove a Member from their position in the queue.
-     * 
+     *
      * @param member The Member to remove
      */
     public void removeFromQueue(Member member) {
+        queue.remove(new QueueMember(member));
+    }
+
+    /**
+     * Remove a QueueMember from their position in the queue.
+     * @param member The QueueMember to remove
+     */
+    public void removeFromQueue(QueueMember member) {
         queue.remove(member);
     }
 
     /**
      * Check if a Member is inside the queue.
-     * 
+     *
      * @param member The Member to check
-     * 
+     *
      * @return True if the member is in the queue, false otherwise
      */
     public boolean isInQueue(Member member) {
-        return queue.contains(member);
+        return queue.contains(new QueueMember(member));
     }
 
     /**
-     * Returns an array of all Members in the queue.
-     * 
-     * @return The Members in this queue
+     * Returns an array of all QueueMembers in the queue.
+     *
+     * @return The QueueMembers in this queue
      */
-    public Member[] getMembersInQueue() {
-        return queue.toArray(new Member[0]);
+    public QueueMember[] getMembersInQueue() {
+        return queue.toArray(new QueueMember[0]);
     }
 
     /**
-     * Remove and return the next Member in the queue.
-     * 
-     * @return The new mentee
+     * Removes and return the next QueueMember in the queue.
+     *
+     * @return The QueueMember at the front of the queue
      */
-    public Member popFromQueue() {
+    public QueueMember popFromQueue() {
         return queue.remove();
     }
 
     /**
      * Create a new mentoring room for this topic.
-     * 
+     *
      * @param mentee The mentee for this room
-     * 
+     *
      * @return The new Room
      */
-    public Room createRoom(Member mentee) {
+    public Room createRoom(QueueMember mentee) {
         Room room = new Room(this, mentee);
         rooms.put(room.getName(), room);
         return room;
@@ -101,7 +109,7 @@ public class Topic {
 
     /**
      * Delete a Room
-     * 
+     *
      * @param room The Room to delete
      */
     public void deleteRoom(Room room) {
@@ -111,9 +119,9 @@ public class Topic {
 
     /**
      * Geets the Room with the specified name
-     * 
+     *
      * @param roomName The name of the Room to retrieve
-     * 
+     *
      * @return The Room object, or null if the Room does not exist
      */
     public Optional<Room> getRoom(String roomName) {
@@ -124,7 +132,7 @@ public class Topic {
 
     /**
      * Get the name of this Topic.
-     * 
+     *
      * @return This Topic's name
      */
     public String getName() {
@@ -133,7 +141,7 @@ public class Topic {
 
     /**
      * Get the role for this Topic.
-     * 
+     *
      * @return This Topic's role
      */
     public Role getRole() {
@@ -142,7 +150,7 @@ public class Topic {
 
     /**
      * Get the category for this Topic.
-     * 
+     *
      * @return This Topic's category
      */
     public Category getCategory() {
