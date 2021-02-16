@@ -229,6 +229,13 @@ public class MainEventListener extends ListenerAdapter {
         if (optionalTopic.isEmpty()) return;
 
         Topic topic = optionalTopic.get();
+
+        // do not run if the member is already in the queue
+        if (topic.isInQueue(member)) {
+            BotResponses.alreadyInQueue(channel, member, topic);
+            return;
+        }
+
         topic.addToQueue(new QueueMember(member, message));
         BotResponses.joinedQueue(channel, member, topicName);
     }
@@ -246,6 +253,13 @@ public class MainEventListener extends ListenerAdapter {
         if (optionalTopic.isEmpty()) return;
 
         Topic topic = optionalTopic.get();
+
+        // do not run if the member is not in the queue
+        if (!topic.isInQueue(member)) {
+            BotResponses.selfNotInQueue(channel, member, topic);
+            return;
+        }
+
         topic.removeFromQueue(member);
         BotResponses.leftQueue(channel, member, topicName);
     }

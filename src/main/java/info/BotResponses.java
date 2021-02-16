@@ -143,6 +143,34 @@ public class BotResponses {
     }
 
     /**
+     * Lets the mentee know that they are not in the queue
+     *
+     * @param channel The text channel to send message to
+     * @param member The mentee to be pinged/mentioned
+     * @param topic The topic that the mentee is not queued for
+     */
+    public static void selfNotInQueue(TextChannel channel, Member member, Topic topic) {
+        channel.sendMessage(String.format(
+            "%s You are not in the queue for topic \"%s\".",
+            member.getAsMention(),
+            topic.getName())).queue();
+    }
+
+    /**
+     * Lets the mentee know that they are already in the queue
+     *
+     * @param channel The text channel to send message to
+     * @param member The mentee to be pinged/mentioned
+     * @param topic The topic that the mentee is not queued for
+     */
+    public static void alreadyInQueue(TextChannel channel, Member member, Topic topic) {
+        channel.sendMessage(String.format(
+            "%s You are already in the queue for topic \"%s\".",
+            member.getAsMention(),
+            topic.getName())).queue();
+    }
+
+    /**
      * Notifies the user that they have successfully joined the queue
      *
      * @param channel The text channel to send message to
