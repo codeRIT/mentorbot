@@ -182,14 +182,15 @@ public class MainEventListener extends ListenerAdapter {
     }
 
     private void deleteTopic(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
+        if (args.length != 1) {
+            BotResponses.invalidParameters(channel, member, "deletetopic <topic>");
+            return;
+        }
+
         // do not allow non-admins to run command
         if (!isAdmin(member)) {
             BotResponses.noAdminPermission(channel, member);
             return;
-        }
-
-        if (args.length != 1) {
-            BotResponses.invalidParameters(channel, member, "deletetopic <topic>");
         }
 
         String topicName = args[0];
@@ -201,6 +202,7 @@ public class MainEventListener extends ListenerAdapter {
     private void showTopics(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
         if (args.length != 0) {
             BotResponses.invalidParameters(channel, member, "showtopics");
+            return;
         }
 
         String topicList = Arrays.stream(server.getTopics())
@@ -213,6 +215,7 @@ public class MainEventListener extends ListenerAdapter {
     private void queue(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
         if (args.length < 2) {
             BotResponses.invalidParameters(channel, member, "queue <topic> <reason>");
+            return;
         }
 
         String topicName = args[0];
@@ -235,6 +238,7 @@ public class MainEventListener extends ListenerAdapter {
     private void ready(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
         if (args.length != 1) {
             BotResponses.invalidParameters(channel, member, "ready <topic>");
+            return;
         }
 
         String topicName = args[0];
@@ -258,6 +262,7 @@ public class MainEventListener extends ListenerAdapter {
     private void showQueue(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
         if (args.length != 1) {
             BotResponses.invalidParameters(channel, member, "showqueue <topic>");
+            return;
         }
 
         String topicName = args[0];
@@ -281,6 +286,7 @@ public class MainEventListener extends ListenerAdapter {
     private void kick(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
         if (args.length < 3) {
             BotResponses.invalidParameters(channel, member, "kick <@member> <topic> <reason>");
+            return;
         }
 
         Member mentee = mentions[0];  // also takes up args[0]
@@ -311,6 +317,7 @@ public class MainEventListener extends ListenerAdapter {
     private void clear(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
         if (args.length != 1) {
             BotResponses.invalidParameters(channel, member, "clear <topic>");
+            return;
         }
 
         String topicName = args[0];
@@ -334,6 +341,7 @@ public class MainEventListener extends ListenerAdapter {
     private void finish(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
         if (args.length != 0) {
             BotResponses.invalidParameters(channel, member, "finish");
+            return;
         }
 
         Topic topic = null;
