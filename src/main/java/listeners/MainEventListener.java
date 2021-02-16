@@ -129,6 +129,7 @@ public class MainEventListener extends ListenerAdapter {
             case "deletetopic" -> commandHandler = this::deleteTopic;
             case "showtopics"  -> commandHandler = this::showTopics;
             case "queue"       -> commandHandler = this::queue;
+            case "leave"       -> commandHandler = this::leave;
             case "ready"       -> commandHandler = this::ready;
             case "showqueue"   -> commandHandler = this::showQueue;
             case "kick"        -> commandHandler = this::kick;
@@ -145,7 +146,8 @@ public class MainEventListener extends ListenerAdapter {
         embedBuilder.setDescription("Possible commands:");
         embedBuilder.setColor(0xE57D25);
 
-        embedBuilder.addField("$queue <topic> [<message>]", "Add yourself to a queue. If entering the queue, a message can be attached.", false);
+        embedBuilder.addField("$queue <topic> <message>", "Add yourself to a queue with a message for the mentor.", false);
+        embedBuilder.addField("$leave <topic>", "Remove yourself from a queue.", false);
         embedBuilder.addField("$showqueue <topic>", "Show the people currently in queue.", false);
         embedBuilder.addField("$showtopics", "List all topics.", false);
 
@@ -214,8 +216,33 @@ public class MainEventListener extends ListenerAdapter {
     }
 
     private void queue(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
-        if (args.length < 1) {
-            BotResponses.invalidParameters(channel, member, "queue <topic> [<reason>]");
+        if (args.length < 2) {
+            BotResponses.invalidParameters(channel, member, "queue <topic> <reason>");
+            return;
+        }
+
+        String topicName = args[0];
+        String message = Stream.of(args).skip(1).collect(Collectors.joining(" "));
+
+        // do not run if topic does not exist
+        Optional<Topic> optionalTopic = checkTopicExists(member, channel, server, topicName);
+        if (optionalTopic.isEmpty()) return;
+
+        Topic topic = optionalTopic.get();
+
+        // do not run if the member is already in the queue
+        if (topic.isInQueue(member)) {
+            BotResponses.alreadyInQueue(channel, member, topic);
+            return;
+        }
+
+        topic.addToQueue(new QueueMember(member, message));
+        BotResponses.joinedQueue(channel, member, topicName);
+    }
+
+    private void leave(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
+        if (args.length != 1) {
+            BotResponses.invalidParameters(channel, member, "leave <topic>");
             return;
         }
 
@@ -226,14 +253,15 @@ public class MainEventListener extends ListenerAdapter {
         if (optionalTopic.isEmpty()) return;
 
         Topic topic = optionalTopic.get();
-        if (topic.isInQueue(member)) {
-            topic.removeFromQueue(member);
-            BotResponses.leftQueue(channel, member, topicName);
-        } else {
-            String message = Stream.of(args).skip(1).collect(Collectors.joining(" "));
-            topic.addToQueue(new QueueMember(member, message));
-            BotResponses.joinedQueue(channel, member, topicName);
+
+        // do not run if the member is not in the queue
+        if (!topic.isInQueue(member)) {
+            BotResponses.selfNotInQueue(channel, member, topic);
+            return;
         }
+
+        topic.removeFromQueue(member);
+        BotResponses.leftQueue(channel, member, topicName);
     }
 
     private void ready(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
