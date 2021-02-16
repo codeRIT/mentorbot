@@ -104,7 +104,7 @@ public class Topic {
      *
      * @return The new Room
      */
-    public Room createRoom(Member mentee) {
+    public Room createRoom(QueueMember mentee) {
         Room room = new Room(this, mentee);
         rooms.put(room.getName(), room);
         return room;

@@ -231,7 +231,7 @@ public class MainEventListener extends ListenerAdapter {
         }
 
         QueueMember mentee = topic.popFromQueue();
-        Room room = topic.createRoom(mentee.getMember());
+        Room room = topic.createRoom(mentee);
         BotResponses.mentorIsReady(channel, member, mentee.getMember(), room);
     }
 
