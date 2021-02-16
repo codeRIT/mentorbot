@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 
+import info.BotResponses;
 import info.Config;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Category;
@@ -62,6 +63,9 @@ public class Room {
 
         voiceChannel = category.createVoiceChannel(name).complete();
         setChannelPermissions(voiceChannel, guild.getPublicRole(), allowList);
+
+        // send session prompt
+        BotResponses.topicChannelPrompt(textChannel, mentee.getMember(), mentee.getMessage());
     }
 
     /**
