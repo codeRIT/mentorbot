@@ -10,7 +10,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
  */
 public class BotResponses {
     /**
-     * Telling the user they do not have permission for a command
+     * Tells the user they do not have permission for a command
      *
      * @param channel The text channel to send message to
      * @param member The member to ping/mention
@@ -20,7 +20,7 @@ public class BotResponses {
     }
 
     /**
-     * Telling the user they do not have admin permission for a command
+     * Tells the user they do not have admin permission for a command
      *
      * @param channel The text channel to send message to
      * @param member The member to ping/mention
@@ -30,7 +30,7 @@ public class BotResponses {
     }
 
     /**
-     * Telling the user that the attempted command does not exist
+     * Tells the user that the attempted command does not exist
      *
      * @param channel The text channel to send message to
      * @param member The member to ping/mention
@@ -40,7 +40,7 @@ public class BotResponses {
     }
 
     /**
-     * Telling the user that the attempted command must be run in a topic's text channel
+     * Tells the user that the attempted command must be run in a topic's text channel
      *
      * @param channel The text channel to send message to
      * @param member The member to ping/mention
@@ -66,7 +66,7 @@ public class BotResponses {
     }
 
     /**
-     * Showing the list of mentees in a queue
+     * Shows the list of mentees in a queue
      *
      * @param channel The text channel to send message to
      * @param member The member to ping/mention
@@ -82,7 +82,7 @@ public class BotResponses {
     }
 
     /**
-     * Reporting that the queue is empty
+     * Reports that the queue is empty
      *
      * @param channel The text channel to send message to
      * @param member The member to ping/mention
@@ -96,7 +96,7 @@ public class BotResponses {
     }
 
     /**
-     * Letting the mentee know that their mentor is ready
+     * Lets the mentee know that their mentor is ready
      *
      * @param channel The text channel to send message to
      * @param member The mentor who is ready
@@ -113,7 +113,7 @@ public class BotResponses {
     }
 
     /**
-     * Letting the mentor know that a mentee is not in the queue
+     * Lets the mentor know that a mentee is not in the queue
      *
      * @param channel The text channel to send message to
      * @param member The mentor to be pinged/mentioned
@@ -129,7 +129,7 @@ public class BotResponses {
     }
 
     /**
-     * Notifing the user that they have successfully joined the queue
+     * Notifies the user that they have successfully joined the queue
      *
      * @param channel The text channel to send message to
      * @param member The member to ping/mention
@@ -143,7 +143,7 @@ public class BotResponses {
     }
 
     /**
-     * Notifing the user that they have successfully left the queue
+     * Notifies the user that they have successfully left the queue
      *
      * @param channel The text channel to send message to
      * @param member The member to ping/mention
@@ -157,7 +157,7 @@ public class BotResponses {
     }
 
     /**
-     * Notifying a mentee that they have been kicked from a queue
+     * Notifies a mentee that they have been kicked from a queue
      *
      * @param channel The text channel to send message to
      * @param member The member who kicked them
@@ -173,7 +173,7 @@ public class BotResponses {
     }
 
     /**
-     * Showing the user a list of topics for mentoring
+     * Shows the user a list of topics for mentoring
      *
      * @param channel The text channel to send message to
      * @param member The member to ping/mention
@@ -214,6 +214,13 @@ public class BotResponses {
             topicName)).queue();
     }
 
+    /**
+     * Tells the user that the topic does not exist
+     *
+     * @param channel The text channel to send message to
+     * @param member The member to ping/mention
+     * @param topicName The topic that does not exist
+     */
     public static void noSuchTopic(TextChannel channel, Member member, String topicName) {
         channel.sendMessage(String.format(
             "%s Topic \"%s\" does not exist.",
