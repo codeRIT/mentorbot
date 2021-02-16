@@ -54,10 +54,7 @@ public class Topic {
      * @param member The Member to remove
      */
     public void removeFromQueue(Member member) {
-        int index = queue.indexOf(new QueueMember(member));
-        if (index != -1) {
-            queue.remove(index);
-        }
+        queue.remove(new QueueMember(member));
     }
 
     /**
