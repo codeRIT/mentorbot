@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 
+import info.BotResponses;
 import info.Config;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Category;
@@ -11,7 +12,6 @@ import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.IPermissionHolder;
 import net.dv8tion.jda.api.entities.Invite;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.VoiceChannel;
@@ -37,7 +37,7 @@ public class Room {
      * @param number This room's number
      * @param mentee The mentee using this room
      */
-    public Room(Topic topic, Member mentee) {
+    public Room(Topic topic, QueueMember mentee) {
         this.category = topic.getCategory();
         this.name = String.format("%s-%d", topic.getName(), nextRoomNumber);
         nextRoomNumber++;
@@ -50,7 +50,7 @@ public class Room {
         ArrayList<IPermissionHolder> allowList = new ArrayList<IPermissionHolder>();
         allowList.add(guild.getMember(guild.getJDA().getSelfUser()));  // allow the bot itself
         allowList.add(topic.getRole());  // allow this topics' mentors
-        allowList.add(mentee);  // allow the mentee
+        allowList.add(mentee.getMember());  // allow the mentee
 
         // allow all admin roles
         for (String adminRoleName : Config.ADMIN_ROLES) {
@@ -63,6 +63,9 @@ public class Room {
 
         voiceChannel = category.createVoiceChannel(name).complete();
         setChannelPermissions(voiceChannel, guild.getPublicRole(), allowList);
+
+        // send session prompt
+        BotResponses.topicChannelPrompt(textChannel, mentee.getMember(), mentee.getMessage());
     }
 
     /**
