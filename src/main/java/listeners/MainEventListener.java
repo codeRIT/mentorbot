@@ -1,5 +1,6 @@
 package listeners;
 
+import entities.QueueMember;
 import entities.Room;
 import entities.Server;
 import entities.Topic;
@@ -144,7 +145,7 @@ public class MainEventListener extends ListenerAdapter {
         embedBuilder.setDescription("Possible commands:");
         embedBuilder.setColor(0xE57D25);
 
-        embedBuilder.addField("$queue <topic>", "Add yourself to a queue.", false);
+        embedBuilder.addField("$queue <topic> [<message>]", "Add yourself to a queue. If entering the queue, a message can be attached.", false);
         embedBuilder.addField("$showqueue <topic>", "Show the people currently in queue.", false);
         embedBuilder.addField("$showtopics", "List all topics.", false);
 
@@ -225,7 +226,8 @@ public class MainEventListener extends ListenerAdapter {
             topic.removeFromQueue(member);
             BotResponses.leftQueue(channel, member, topicName);
         } else {
-            topic.addToQueue(member);
+            String message = Stream.of(args).skip(1).collect(Collectors.joining(" "));
+            topic.addToQueue(new QueueMember(member, message));
             BotResponses.joinedQueue(channel, member, topicName);
         }
     }
@@ -244,9 +246,9 @@ public class MainEventListener extends ListenerAdapter {
             return;
         }
 
-        Member mentee = topic.popFromQueue();
+        QueueMember mentee = topic.popFromQueue();
         Room room = topic.createRoom(mentee);
-        BotResponses.mentorIsReady(channel, member, mentee, room);
+        BotResponses.mentorIsReady(channel, member, mentee.getMember(), room);
     }
 
     private void showQueue(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
@@ -262,7 +264,7 @@ public class MainEventListener extends ListenerAdapter {
             BotResponses.queueIsEmpty(channel, member, topic);;
         } else {
             String menteeList = Arrays.stream(topic.getMembersInQueue())
-                .map(Member::getEffectiveName)
+                .map(qm -> String.format("%s: %s", qm.getMember().getEffectiveName(), qm.getMessage()))
                 .collect(Collectors.joining("\n"));
             BotResponses.showQueueMembers(channel, member, topic, menteeList);
         }

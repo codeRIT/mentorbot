@@ -52,6 +52,20 @@ public class BotResponses {
     }
 
     /**
+     * Tells the mentor and user what the queue message was.
+     *
+     * @param channel The text channel to send message to
+     * @param member The member to mention
+     * @param prompt The member's question
+     */
+    public static void topicChannelPrompt(TextChannel channel, Member mentee, String prompt) {
+        channel.sendMessage(String.format(
+            "%s's question: %s",
+            mentee.getEffectiveName(),
+            prompt)).queue();
+    }
+
+    /**
      * Confirmation feedback for clearing the queue
      *
      * @param channel The text channel to send message to
