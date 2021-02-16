@@ -60,9 +60,9 @@ public class BotResponses {
      */
     public static void queueCleared(TextChannel channel, Member member, Topic topic) {
         channel.sendMessage(String.format(
-                "%s has cleared the \"%s\" queue.",
-                member.getAsMention(),
-                topic.getName())).queue();
+            "%s has cleared the \"%s\" queue.",
+            member.getAsMention(),
+            topic.getName())).queue();
     }
 
     /**
@@ -75,10 +75,10 @@ public class BotResponses {
      */
     public static void showQueueMembers(TextChannel channel, Member member, Topic topic, String menteeList) {
         channel.sendMessage(String.format(
-                    "%s Members in \"%s\" queue:\n%s",
-                    member.getAsMention(),
-                    topic.getName(),
-                    menteeList)).queue();
+            "%s Members in \"%s\" queue:\n%s",
+            member.getAsMention(),
+            topic.getName(),
+            menteeList)).queue();
     }
 
     /**
@@ -90,9 +90,9 @@ public class BotResponses {
      */
     public static void queueIsEmpty(TextChannel channel, Member member, Topic topic) {
         channel.sendMessage(String.format(
-                    "%s Queue \"%s\" is empty.",
-                    member.getAsMention(),
-                    topic.getName())).queue();
+            "%s Queue \"%s\" is empty.",
+            member.getAsMention(),
+            topic.getName())).queue();
     }
 
     /**
@@ -122,11 +122,10 @@ public class BotResponses {
      */
     public static void notInQueue(TextChannel channel, Member member, Member mentee, Topic topic) {
         channel.sendMessage(String.format(
-                "%s User \"%s\" is not in the queue for topic \"%s\".",
-                member.getAsMention(),
-                mentee.getEffectiveName(),
-                topic.getName()
-            )).queue();
+            "%s User \"%s\" is not in the queue for topic \"%s\".",
+            member.getAsMention(),
+            mentee.getEffectiveName(),
+            topic.getName())).queue();
     }
 
     /**
@@ -138,9 +137,9 @@ public class BotResponses {
      */
     public static void joinedQueue(TextChannel channel, Member member, String topicName) {
         channel.sendMessage(String.format(
-                    "%s has joined the \"%s\" queue.",
-                    member.getAsMention(),
-                    topicName)).queue();
+            "%s has joined the \"%s\" queue.",
+            member.getAsMention(),
+            topicName)).queue();
     }
 
     /**
@@ -152,9 +151,9 @@ public class BotResponses {
      */
     public static void leftQueue(TextChannel channel, Member member, String topicName) {
         channel.sendMessage(String.format(
-                    "%s has left the \"%s\" queue.",
-                    member.getAsMention(),
-                    topicName)).queue();
+            "%s has left the \"%s\" queue.",
+            member.getAsMention(),
+            topicName)).queue();
     }
 
     /**
@@ -170,8 +169,7 @@ public class BotResponses {
             "User %s was kicked out of the queue by %s. Reason: %s",
             mentee.getAsMention(),
             member.getAsMention(),
-            reason
-        )).queue();
+            reason)).queue();
     }
 
     /**
@@ -183,9 +181,9 @@ public class BotResponses {
      */
     public static void sendTopicList(TextChannel channel, Member member, String topicList) {
         channel.sendMessage(String.format(
-                "%s List of topics:\n%s",
-                member.getAsMention(),
-                topicList)).queue();
+            "%s List of topics:\n%s",
+            member.getAsMention(),
+            topicList)).queue();
     }
 
     /**
@@ -197,9 +195,9 @@ public class BotResponses {
      */
     public static void topicDeleted(TextChannel channel, Member member, String topicName) {
         channel.sendMessage(String.format(
-                "%s Topic role \"%s\" has been deleted.",
-                member.getAsMention(),
-                topicName)).queue();
+            "%s Topic role \"%s\" has been deleted.",
+            member.getAsMention(),
+            topicName)).queue();
     }
 
     /**
@@ -211,15 +209,15 @@ public class BotResponses {
      */
     public static void topicCreated(TextChannel channel, Member member, String topicName) {
         channel.sendMessage(String.format(
-                "%s Topic role \"%s\" has been created.",
-                member.getAsMention(),
-                topicName)).queue();
+            "%s Topic role \"%s\" has been created.",
+            member.getAsMention(),
+            topicName)).queue();
     }
 
     public static void noSuchTopic(TextChannel channel, Member member, String topicName) {
         channel.sendMessage(String.format(
-                    "%s Topic \"%s\" does not exist.",
-                    member.getAsMention(),
-                    topicName)).queue();
+            "%s Topic \"%s\" does not exist.",
+            member.getAsMention(),
+            topicName)).queue();
     }
 }

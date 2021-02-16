@@ -246,9 +246,8 @@ public class MainEventListener extends ListenerAdapter {
             BotResponses.queueIsEmpty(channel, member, topic);;
         } else {
             String menteeList = Arrays.stream(topic.getMembersInQueue())
-                    .map(Member::getEffectiveName)
-                    .collect(Collectors.joining("\n"));
-
+                .map(Member::getEffectiveName)
+                .collect(Collectors.joining("\n"));
             BotResponses.showQueueMembers(channel, member, topic, menteeList);
         }
     }
