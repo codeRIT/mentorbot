@@ -14,4 +14,9 @@ public class Config {
         "Director",
         "MLH"
     );
+
+    /**
+     * The prefix character used for bot commands.
+     */
+    public static String COMMAND_PREFIX = "$";
 }

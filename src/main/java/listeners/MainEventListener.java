@@ -111,7 +111,7 @@ public class MainEventListener extends ListenerAdapter {
     @Override
     public void onGuildMessageReceived(@NotNull GuildMessageReceivedEvent event) {
         String[] tokens = event.getMessage().getContentDisplay().split(" ");
-        if (!tokens[0].startsWith("$")) return;
+        if (!tokens[0].startsWith(Config.COMMAND_PREFIX)) return;
         String[] args = Arrays.copyOfRange(tokens, 1, tokens.length);
 
         Member member = Objects.requireNonNull(event.getMember());
@@ -165,6 +165,11 @@ public class MainEventListener extends ListenerAdapter {
     }
 
     private void makeTopic(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
+        if (args.length != 1) {
+            BotResponses.invalidParameters(channel, member, "maketopic <topic>");
+            return;
+        }
+
         // do not allow non-admins to run command
         if (!isAdmin(member)) {
             BotResponses.noAdminPermission(channel, member);
@@ -178,6 +183,11 @@ public class MainEventListener extends ListenerAdapter {
     }
 
     private void deleteTopic(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
+        if (args.length != 1) {
+            BotResponses.invalidParameters(channel, member, "deletetopic <topic>");
+            return;
+        }
+
         // do not allow non-admins to run command
         if (!isAdmin(member)) {
             BotResponses.noAdminPermission(channel, member);
@@ -191,6 +201,11 @@ public class MainEventListener extends ListenerAdapter {
     }
 
     private void showTopics(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
+        if (args.length != 0) {
+            BotResponses.invalidParameters(channel, member, "showtopics");
+            return;
+        }
+
         String topicList = Arrays.stream(server.getTopics())
                 .map(Topic::getName)
                 .collect(Collectors.joining("\n"));
@@ -199,6 +214,11 @@ public class MainEventListener extends ListenerAdapter {
     }
 
     private void queue(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
+        if (args.length < 1) {
+            BotResponses.invalidParameters(channel, member, "queue <topic> [<reason>]");
+            return;
+        }
+
         String topicName = args[0];
 
         // do not run if topic does not exist
@@ -217,6 +237,11 @@ public class MainEventListener extends ListenerAdapter {
     }
 
     private void ready(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
+        if (args.length != 1) {
+            BotResponses.invalidParameters(channel, member, "ready <topic>");
+            return;
+        }
+
         String topicName = args[0];
 
         // do not run if topic does not exist
@@ -236,6 +261,11 @@ public class MainEventListener extends ListenerAdapter {
     }
 
     private void showQueue(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
+        if (args.length != 1) {
+            BotResponses.invalidParameters(channel, member, "showqueue <topic>");
+            return;
+        }
+
         String topicName = args[0];
 
         // do not run if topic does not exist
@@ -255,6 +285,11 @@ public class MainEventListener extends ListenerAdapter {
     }
 
     private void kick(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
+        if (args.length < 3) {
+            BotResponses.invalidParameters(channel, member, "kick <@member> <topic> <reason>");
+            return;
+        }
+
         Member mentee = mentions[0];  // also takes up args[0]
         String topicName = args[1];
         String reason = Stream.of(args).skip(2).collect(Collectors.joining(" "));
@@ -281,6 +316,11 @@ public class MainEventListener extends ListenerAdapter {
     }
 
     private void clear(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
+        if (args.length != 1) {
+            BotResponses.invalidParameters(channel, member, "clear <topic>");
+            return;
+        }
+
         String topicName = args[0];
 
         // do not run if topic does not exist
@@ -300,6 +340,11 @@ public class MainEventListener extends ListenerAdapter {
     }
 
     private void finish(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
+        if (args.length != 0) {
+            BotResponses.invalidParameters(channel, member, "finish");
+            return;
+        }
+
         Topic topic = null;
         Optional<Room> optionalRoom = Optional.empty();
 

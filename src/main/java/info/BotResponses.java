@@ -241,4 +241,20 @@ public class BotResponses {
             member.getAsMention(),
             topicName)).queue();
     }
+
+    /**
+     * Tells the user that they typed in the command parameters incorrectly
+     *
+     * @param channel The text channel to send message to
+     * @param member The member to ping/mention
+     * @param correctFormat The correct format for the command, NOT including
+     *     the command prefix
+     */
+    public static void invalidParameters(TextChannel channel, Member member, String correctFormat) {
+        channel.sendMessage(String.format(
+            "%s Invalid parameters. Correct format: `%s%s`",
+            member.getAsMention(),
+            Config.COMMAND_PREFIX,
+            correctFormat)).queue();
+    }
 }
