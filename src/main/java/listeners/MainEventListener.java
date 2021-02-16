@@ -4,6 +4,7 @@ import entities.Room;
 import entities.Server;
 import entities.Topic;
 import info.BotResponses;
+import info.Config;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
@@ -40,14 +41,19 @@ public class MainEventListener extends ListenerAdapter {
     private final HashMap<String, Server> servers = new HashMap<>();
 
     /**
-     * Check if the given Member has administrator permissions.
+     * Check if the given Member has administrator permissions or an
+     * administrator role.
      *
      * @param member The Member to check
      *
-     * @return True if the Member has admin, false otherwise
+     * @return True if the Member is an admin, false otherwise
      */
     private static boolean isAdmin(Member member) {
-        return member.hasPermission(Permission.ADMINISTRATOR);
+        boolean hasAdminPermission = member.hasPermission(Permission.ADMINISTRATOR);
+        boolean hasAdminRole = member.getRoles().stream()
+            .anyMatch(r -> Config.ADMIN_ROLES.contains(r.getName()));
+
+        return hasAdminPermission || hasAdminRole;
     }
 
     /**
