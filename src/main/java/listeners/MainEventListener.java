@@ -213,8 +213,8 @@ public class MainEventListener extends ListenerAdapter {
     }
 
     private void queue(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
-        if (args.length < 2) {
-            BotResponses.invalidParameters(channel, member, "queue <topic> <reason>");
+        if (args.length < 1) {
+            BotResponses.invalidParameters(channel, member, "queue <topic> [<reason>]");
             return;
         }
 
