@@ -165,14 +165,15 @@ public class MainEventListener extends ListenerAdapter {
     }
 
     private void makeTopic(Member member, TextChannel channel, Server server, String[] args, Member[] mentions) {
+        if (args.length != 1) {
+            BotResponses.invalidParameters(channel, member, "maketopic <topic>");
+            return;
+        }
+
         // do not allow non-admins to run command
         if (!isAdmin(member)) {
             BotResponses.noAdminPermission(channel, member);
             return;
-        }
-
-        if (args.length != 1) {
-            BotResponses.invalidParameters(channel, member, "maketopic <topic>");
         }
 
         String topicName = args[0];
