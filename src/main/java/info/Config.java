@@ -11,8 +11,8 @@ public class Config {
      * mentoring rooms.
      */
     public static Set<String> ADMIN_ROLES = Set.of(
-        "Director",
-        "MLH"
+        "Directors Offline",
+        "Major League Hacking"
     );
 
     /**
