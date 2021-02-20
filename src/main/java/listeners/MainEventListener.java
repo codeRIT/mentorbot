@@ -153,14 +153,14 @@ public class MainEventListener extends ListenerAdapter {
 
         if (isMentor(member) || isAdmin(member)) {
             embedBuilder.addField("$ready <topic> (mentor only)", "Retrieve the next person from the queue.", false);
-            embedBuilder.addField("$kick <@user> <topic> <reason>", "Kick the specified user from the queue.", false);
-            embedBuilder.addField("$clear <topic> (mentor only)", "Clear the specified queue.", false);
+            embedBuilder.addField("$kick <@user> <topic> <reason> (mentor only)", "Kick the specified user from the queue.", false);
             embedBuilder.addField("$finish (mentor only)", "Finish a mentoring session. Must be run inside the text channel for that session.", false);
         }
 
         if (isAdmin(member)) {
             embedBuilder.addField("$maketopic <name> (admin only)", "Create a new topic.", false);
             embedBuilder.addField("$deletetopic <name> (admin only)", "Delete a topic.", false);
+            embedBuilder.addField("$clear <topic> (admin only)", "Clear the specified queue.", false);
         }
 
         channel.sendMessage(embedBuilder.build()).queue();
@@ -362,10 +362,10 @@ public class MainEventListener extends ListenerAdapter {
         Optional<Topic> optionalTopic = checkTopicExists(member, channel, server, topicName);
         if (optionalTopic.isEmpty()) return;
 
-        // do not run if caller does not have mentor role for this topic or admin privileges
+        // do not run if caller is not an admin
         Topic topic = optionalTopic.get();
-        if (!isMentor(member, topic) && !isAdmin(member)) {
-            BotResponses.noPermission(channel, member);
+        if (!isAdmin(member)) {
+            BotResponses.noAdminPermission(channel, member);
             return;
         }
 
