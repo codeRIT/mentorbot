@@ -284,6 +284,12 @@ public class MainEventListener extends ListenerAdapter {
             return;
         }
 
+        // do not run if the topic queue is empty
+        if (topic.getMembersInQueue().length == 0) {
+            BotResponses.queueIsEmpty(channel, member, topic);
+            return;
+        }
+
         QueueMember mentee = topic.popFromQueue();
         Room room = topic.createRoom(mentee);
         BotResponses.mentorIsReady(channel, member, mentee.getMember(), room);
@@ -304,7 +310,7 @@ public class MainEventListener extends ListenerAdapter {
         Topic topic = optionalTopic.get();
 
         if (topic.getMembersInQueue().length == 0) {
-            BotResponses.queueIsEmpty(channel, member, topic);;
+            BotResponses.queueIsEmpty(channel, member, topic);
         } else {
             String menteeList = Arrays.stream(topic.getMembersInQueue())
                 .map(qm -> String.format("%s: %s", qm.getMember().getEffectiveName(), qm.getMessage()))
